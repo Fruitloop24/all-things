@@ -1,0 +1,10 @@
+name = "room-studio-worker"
+main = "src/index.js"
+compatibility_date = "2024-12-01"
+
+[vars]
+ENVIRONMENT = "production"
+
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "cerul-social-media"

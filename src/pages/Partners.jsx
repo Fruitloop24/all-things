@@ -1,0 +1,110 @@
+import { CONFIG } from '../config'
+
+export default function Partners() {
+  return (
+    <div>
+      {/* ── Hero ── */}
+      <section className="relative bg-gradient-to-br from-warm-900 via-warm-800 to-warm-700 text-white py-16 md:py-24 text-center">
+        <div className="relative max-w-3xl mx-auto px-4">
+          <p className="text-warm-300 text-sm font-semibold tracking-widest uppercase mb-3">Work With Us</p>
+          <h1 className="font-heading text-3xl md:text-5xl font-bold mb-4">
+            Partner <span className="text-warm-300">With Us</span>
+          </h1>
+          <p className="text-warm-200/90 text-lg leading-relaxed max-w-xl mx-auto">
+            Whether you need materials, installation, or both — let's team up and get it done right.
+          </p>
+        </div>
+      </section>
+
+      {/* ── Partnership Options ── */}
+      <section className="py-16 bg-warm-50">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Materials */}
+            <div className="bg-white rounded-2xl p-8 shadow-sm border border-warm-100 hover:shadow-lg transition-all">
+              <div className="w-12 h-12 bg-warm-100 rounded-xl flex items-center justify-center mb-5">
+                <svg className="w-6 h-6 text-warm-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                </svg>
+              </div>
+              <h3 className="font-heading text-xl font-bold text-stone-900 mb-3">Materials Partnership</h3>
+              <p className="text-stone-500 text-sm leading-relaxed">
+                Contractors and builders — get access to our supplier network and competitive pricing on hardwood, tile, LVP, carpet, and more. We carry Shaw, Mohawk, Armstrong, Daltile, and COREtec.
+              </p>
+            </div>
+
+            {/* Installation */}
+            <div className="bg-white rounded-2xl p-8 shadow-sm border border-warm-100 hover:shadow-lg transition-all">
+              <div className="w-12 h-12 bg-warm-100 rounded-xl flex items-center justify-center mb-5">
+                <svg className="w-6 h-6 text-warm-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17l-5.384 5.383a2.1 2.1 0 01-2.97-2.97l5.383-5.384m0 0L3.42 7.17l2.12-2.12 5.03 5.03m.9.88l4.05-4.05a2.1 2.1 0 012.97 0l.708.707a2.1 2.1 0 010 2.97l-4.05 4.05m-1.68-1.68l1.68 1.68" />
+                </svg>
+              </div>
+              <h3 className="font-heading text-xl font-bold text-stone-900 mb-3">Installation Partnership</h3>
+              <p className="text-stone-500 text-sm leading-relaxed">
+                Got a project that needs professional installation? Our crew handles hardwood, tile, LVP, carpet, and VCT for residential and commercial jobs across Dodge County and beyond.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Partner Inquiry Form ── */}
+      <section className="py-16 md:py-24 bg-white">
+        <div className="max-w-2xl mx-auto px-4">
+          <h2 className="font-heading text-2xl font-bold text-stone-900 mb-6 text-center">Interested? Fill This Out.</h2>
+          <iframe
+            src="https://docs.google.com/forms/d/e/1FAIpQLSfAa-BvupOXFOYNVpdbtCN2mwJqo_nA-F1TaOOO-kCYXaVBDQ/viewform?embedded=true"
+            className="w-full border-0 rounded-xl"
+            style={{ minHeight: '700px' }}
+            title="Partner Inquiry Form"
+            loading="lazy"
+          />
+        </div>
+      </section>
+
+      {/* ── Suppliers Bar ── */}
+      <section className="py-14 bg-warm-50 border-y border-warm-100">
+        <div className="max-w-5xl mx-auto px-4">
+          <p className="text-center text-xs font-semibold tracking-widest uppercase text-stone-400 mb-8">
+            Brands We Carry
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-6">
+            {CONFIG.suppliers.map((supplier) => (
+              <div
+                key={supplier.name}
+                className="flex items-center justify-center px-5 py-3 rounded-lg bg-white border border-stone-100"
+              >
+                <img src={supplier.logo} alt={supplier.name} className="h-14 md:h-16 w-auto object-contain" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA ── */}
+      <section className="py-16 bg-white text-center">
+        <div className="max-w-xl mx-auto px-4">
+          <h2 className="font-heading text-2xl md:text-3xl font-bold text-stone-900 mb-4">Prefer to Talk?</h2>
+          <p className="text-stone-500 mb-8">Give us a call or book a time — we're always happy to chat.</p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <a
+              href={CONFIG.cta.primary.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 bg-warm-700 hover:bg-warm-800 text-white px-8 py-4 rounded-xl font-semibold transition-all no-underline shadow-md"
+            >
+              {CONFIG.cta.primary.text}
+            </a>
+            <a
+              href={CONFIG.cta.call.href}
+              className="inline-flex items-center justify-center gap-2 border-2 border-warm-300 text-warm-700 hover:bg-warm-100 px-8 py-4 rounded-xl font-semibold transition-all no-underline"
+            >
+              {CONFIG.cta.call.text}
+            </a>
+          </div>
+        </div>
+      </section>
+    </div>
+  )
+}
