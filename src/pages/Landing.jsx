@@ -410,12 +410,12 @@ export default function Landing() {
             <div className="bg-gradient-to-br from-warm-50 to-warm-100 rounded-2xl border border-warm-200 p-8 md:p-12">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
                 <div>
-                  <p className="text-warm-500 text-sm font-semibold tracking-widest uppercase mb-2">Free App</p>
+                  <p className="text-warm-500 text-sm font-semibold tracking-widest uppercase mb-2">Get the App</p>
                   <h2 className="font-heading text-2xl md:text-3xl font-bold text-stone-900 mb-4">
-                    Add Us to Your Home Screen
+                    Take Us With You
                   </h2>
                   <p className="text-stone-600 leading-relaxed mb-6">
-                    Get our app with the AI floor visualizer, cost calculator, and more — no app store needed. Scan the QR code or follow the steps below.
+                    Get our app — AI floor visualizer, cost calculator, and more right on your phone. Scan the QR code or follow the steps below to install.
                   </p>
                   <div className="space-y-3">
                     <div className="flex items-start gap-3">
