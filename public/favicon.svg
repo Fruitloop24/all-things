@@ -1,57 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Background circle for clean icon shape -->
-  <rect width="512" height="512" rx="96" fill="#1a2744"/>
-
-  <!-- Top diamond - dark navy herringbone pattern -->
-  <g transform="translate(256,140) rotate(45)">
-    <rect x="-65" y="-65" width="130" height="130" fill="none" stroke="#c8a55a" stroke-width="3" opacity="0.4"/>
-    <!-- Herringbone lines -->
-    <line x1="-45" y1="-30" x2="-10" y2="-30" stroke="#e8e0d4" stroke-width="8" stroke-linecap="round"/>
-    <line x1="-45" y1="-10" x2="-10" y2="-10" stroke="#8b9bb3" stroke-width="8" stroke-linecap="round"/>
-    <line x1="-45" y1="10" x2="-10" y2="10" stroke="#e8e0d4" stroke-width="8" stroke-linecap="round"/>
-    <line x1="-45" y1="30" x2="-10" y2="30" stroke="#8b9bb3" stroke-width="8" stroke-linecap="round"/>
-    <line x1="10" y1="-45" x2="10" y2="-10" stroke="#e8e0d4" stroke-width="8" stroke-linecap="round"/>
-    <line x1="30" y1="-45" x2="30" y2="-10" stroke="#8b9bb3" stroke-width="8" stroke-linecap="round"/>
-    <line x1="10" y1="10" x2="10" y2="45" stroke="#8b9bb3" stroke-width="8" stroke-linecap="round"/>
-    <line x1="30" y1="10" x2="30" y2="45" stroke="#e8e0d4" stroke-width="8" stroke-linecap="round"/>
-  </g>
-
-  <!-- Bottom-left diamond - earth tone tile pattern -->
-  <g transform="translate(175,310) rotate(45)">
-    <rect x="-55" y="-55" width="110" height="110" fill="#6b7b5e" opacity="0.9"/>
-    <!-- Tile grid lines -->
-    <line x1="-55" y1="-15" x2="55" y2="-15" stroke="#4a5a3e" stroke-width="3"/>
-    <line x1="-55" y1="20" x2="55" y2="20" stroke="#4a5a3e" stroke-width="3"/>
-    <line x1="-15" y1="-55" x2="-15" y2="55" stroke="#4a5a3e" stroke-width="3"/>
-    <line x1="20" y1="-55" x2="20" y2="55" stroke="#4a5a3e" stroke-width="3"/>
-    <!-- Highlight tiles -->
-    <rect x="-53" y="-53" width="36" height="36" fill="#8b9b7e" opacity="0.6"/>
-    <rect x="22" y="22" width="31" height="31" fill="#a0aa8e" opacity="0.5"/>
-  </g>
-
-  <!-- Bottom-right diamond - blue plank pattern -->
-  <g transform="translate(337,310) rotate(45)">
-    <rect x="-55" y="-55" width="110" height="110" fill="#4a6a8a" opacity="0.9"/>
-    <!-- Plank lines -->
-    <rect x="-45" y="-45" width="35" height="12" fill="#6b8aaa" rx="2"/>
-    <rect x="-5" y="-45" width="40" height="12" fill="#5a7a9a" rx="2"/>
-    <rect x="-45" y="-28" width="25" height="12" fill="#5a7a9a" rx="2"/>
-    <rect x="-15" y="-28" width="50" height="12" fill="#6b8aaa" rx="2"/>
-    <rect x="-45" y="-11" width="40" height="12" fill="#6b8aaa" rx="2"/>
-    <rect x="0" y="-11" width="35" height="12" fill="#5a7a9a" rx="2"/>
-    <rect x="-45" y="6" width="30" height="12" fill="#5a7a9a" rx="2"/>
-    <rect x="-10" y="6" width="45" height="12" fill="#6b8aaa" rx="2"/>
-    <rect x="-45" y="23" width="45" height="12" fill="#6b8aaa" rx="2"/>
-    <rect x="5" y="23" width="30" height="12" fill="#5a7a9a" rx="2"/>
-    <rect x="-45" y="40" width="20" height="12" fill="#5a7a9a" rx="2"/>
-    <rect x="-20" y="40" width="55" height="12" fill="#6b8aaa" rx="2"/>
-  </g>
-
-  <!-- Gold diamond outline (accent) -->
-  <g transform="translate(310,210) rotate(45)">
-    <rect x="-35" y="-35" width="70" height="70" fill="none" stroke="#c8a55a" stroke-width="4"/>
-  </g>
-
-  <!-- Text: AT -->
-  <text x="256" y="470" text-anchor="middle" font-family="Georgia, serif" font-weight="700" font-size="56" fill="#e8e0d4" letter-spacing="4">AT</text>
+  <rect width="512" height="512" rx="96" fill="#fdf8f0"/>
+  <rect x="16" y="16" width="480" height="480" rx="80" fill="none" stroke="#c08552" stroke-width="8" opacity="0.3"/>
+  <text x="256" y="310" text-anchor="middle" font-family="Georgia, 'Playfair Display', serif" font-weight="700" font-size="260" fill="#6b472e" letter-spacing="-10">AT</text>
+  <text x="256" y="410" text-anchor="middle" font-family="Georgia, 'Playfair Display', serif" font-weight="400" font-size="60" fill="#c08552" letter-spacing="16">F&amp;T</text>
 </svg>
