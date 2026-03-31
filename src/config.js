@@ -40,9 +40,9 @@ export const CONFIG = {
 
   // ─── CONTACT ───
   phone: {
-    raw: '4783412204',
-    display: '(478) 341-2204',
-    href: 'tel:4783412204',
+    raw: '4782317935',
+    display: '(478) 231-7935',
+    href: 'tel:4782317935',
   },
   address: {
     street: '1245 College St',
@@ -73,8 +73,8 @@ export const CONFIG = {
       href: 'https://calendar.app.google/LjFfVnMG14BtDwGo9',
     },
     call: {
-      text: 'Call (478) 341-2204',
-      href: 'tel:4783412204',
+      text: 'Call (478) 231-7935',
+      href: 'tel:4782317935',
     },
     email: {
       text: 'Email Us',
@@ -100,7 +100,7 @@ export const CONFIG = {
     { to: '/', label: 'Home', icon: 'home' },
     { to: '/studio', label: 'Studio', icon: 'studio' },
     { to: '/community', label: 'Community', icon: 'community' },
-    { to: 'tel:4783412204', label: 'Call', icon: 'phone', external: true },
+    { to: 'tel:4782317935', label: 'Call', icon: 'phone', external: true },
   ],
 
   // ─── HERO ───

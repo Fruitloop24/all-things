@@ -114,6 +114,6 @@ Set via `wrangler secret put` (these do NOT go in the frontend):
 
 - **Business:** All Things Flooring & Tile
 - **Location:** 1245 College St, Eastman, GA 31023
-- **Phone:** (478) 341-2204
+- **Phone:** (478) 231-7935
 - **Email:** kc@cerul.org
 - **Hours:** Monday-Friday 8am-4pm
