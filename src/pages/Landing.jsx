@@ -435,7 +435,7 @@ export default function Landing() {
                 <div className="flex flex-col items-center">
                   <div className="bg-white rounded-2xl p-6 shadow-md border border-warm-100">
                     <QRCodeSVG
-                      value={typeof window !== 'undefined' ? window.location.origin : 'https://allthingsflooringandtile.com'}
+                      value="https://all-things.pages.dev/"
                       size={200}
                       bgColor="#ffffff"
                       fgColor="#1a2744"
