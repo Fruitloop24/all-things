@@ -31,3 +31,7 @@ worker/.wrangler
 # Environment
 .env
 .env.*
+
+# Sub-projects (separate repos)
+flooring-app/
+.playwright-mcp/
