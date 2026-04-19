@@ -1,32 +1,30 @@
 {
   "name": "all-thing",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
   },
   "dependencies": {
-    "qrcode.react": "^4.2.0",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "react-router-dom": "^7.13.2",
-    "vite-plugin-pwa": "^1.2.0"
+    "@astrojs/preact": "^4.0.10",
+    "@astrojs/sitemap": "^3.7.1",
+    "@tailwindcss/vite": "^4.2.2",
+    "@vite-pwa/astro": "^1.1.2",
+    "astro": "^6.1.8",
+    "astro-compress": "^2.4.1",
+    "astro-icon": "^1.1.5",
+    "astro-seo": "^1.1.0",
+    "preact": "^10.26.9",
+    "tailwindcss": "^4.2.2"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.4",
-    "@tailwindcss/vite": "^4.2.2",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.1",
-    "eslint": "^9.39.4",
-    "eslint-plugin-react-hooks": "^7.0.1",
-    "eslint-plugin-react-refresh": "^0.5.2",
-    "globals": "^17.4.0",
-    "tailwindcss": "^4.2.2",
-    "vite": "^8.0.1"
+    "@iconify-json/tabler": "^1.2.12",
+    "@types/node": "^22.10.5",
+    "qrcode": "^1.5.4",
+    "typescript": "^5.7.3"
   }
 }

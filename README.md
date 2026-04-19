@@ -2,7 +2,7 @@
 
 Website and PWA for **All Things Flooring & Tile** — a flooring business in Eastman, GA serving Dodge County and surrounding areas since 2009.
 
-**Live site:** Cloudflare Pages (connect this repo, build command: `npm run build`, output: `dist`)
+**Live site:** https://allthingsflooringntile.com (Cloudflare Pages — build command: `npm run build`, output: `dist`)
 
 ## What This Is
 
@@ -15,15 +15,16 @@ A full-featured business website with:
 - **Sq Ft Challenge Game** — interactive game on the Resources page to practice calculating square footage of odd-shaped rooms
 - **Newsletter** — Google Forms integration for email signups
 - **Community Page** — involvement cards, events timeline, Facebook group link
-- **Config-driven** — all business info, pricing, CTAs, and content lives in `src/config.js`
+- **Config-driven** — all business info, pricing, CTAs, and content lives in `src/config.ts`
 
 ## Tech Stack
 
 | Layer | Tech |
 |-------|------|
-| Frontend | React 19, React Router 7, Tailwind CSS 4 (`@tailwindcss/vite`), Vite 8 |
-| PWA | `vite-plugin-pwa` with Workbox, auto-update service worker |
-| Backend | Cloudflare Worker (`worker/src/index.js`) |
+| Frontend | Astro 6 (static output), Preact islands, Tailwind CSS 4 (`@tailwindcss/vite`) |
+| SEO | `astro-seo`, `@astrojs/sitemap`, JSON-LD `HomeAndConstructionBusiness` schema |
+| PWA | `@vite-pwa/astro` with Workbox, auto-update service worker |
+| Backend | Cloudflare Worker (`worker/src/index.js`) — origin allowlist + rate limit |
 | AI | Gemini 2.5 Flash (primary), OpenAI GPT-Image-1 (fallback) |
 | Storage | Cloudflare R2 bucket `cerul-social-media` |
 | Deploy | Cloudflare Pages (frontend), Wrangler (worker) |
@@ -33,10 +34,10 @@ A full-featured business website with:
 | Route | What It Does |
 |-------|-------------|
 | `/` | Hero, services, project showcase, testimonials, supplier logos, QR install, showroom CTA |
-| `/studio` | AI Visualizer + Cost Calculator (tabbed) |
+| `/studio` | AI Visualizer + Cost Calculator (Preact island) |
 | `/about` | Team bios — Ron, Jamie, Landin, Gavin |
 | `/community` | Community involvement, events timeline, Facebook group, contact |
-| `/resources` | Sq ft guide, Sq Ft Challenge game, YouTube videos, newsletter signup |
+| `/resources` | Sq ft guide, Sq Ft Challenge game (Preact island), YouTube videos, newsletter signup |
 | `/newsletter` | Dedicated newsletter signup page |
 | `/partners` | Supplier partnerships and materials |
 
@@ -44,35 +45,41 @@ A full-featured business website with:
 
 ```
 src/
-  config.js              # Single source of truth for ALL content & pricing
-  main.jsx               # Router setup
-  index.css              # Tailwind imports + custom theme
+  config.ts                    # Single source of truth for ALL content & pricing
+  env.d.ts                     # Astro + PWA type refs
+  pwa.ts                       # Service worker registration
+  layouts/
+    Base.astro                 # SEO, OG, geo meta, PWA manifest, header/footer shell
   components/
-    Layout.jsx           # Header + Outlet + Footer + MobileNav
-    Header.jsx           # Desktop nav, phone, booking button
-    Footer.jsx           # Links, contact, copyright
-    MobileNav.jsx        # Bottom nav bar for mobile
+    Header.astro               # Desktop nav + mobile toggle
+    Footer.astro               # Links, contact, copyright
+    MobileNav.astro            # Bottom nav bar for mobile
+    SchemaLocalBusiness.astro  # JSON-LD structured data
+    Studio.tsx                 # Preact island — AI Visualizer + Cost Calculator
+    SqFtChallenge.tsx          # Preact island — sq ft practice game
   pages/
-    Landing.jsx          # Main landing page
-    Studio.jsx           # AI Visualizer + Cost Calculator
-    About.jsx            # Team bios
-    Community.jsx        # Events, involvement, connect
-    Resources.jsx        # Guides, YouTube, sq ft game
-    Newsletter.jsx       # Email signup
-    Partners.jsx         # Supplier partnerships
+    index.astro                # Landing
+    studio.astro               # Mounts <Studio client:load />
+    about.astro                # Team bios
+    community.astro            # Events, involvement, connect
+    resources.astro            # Guides, YouTube, sq ft game
+    newsletter.astro           # Email signup
+    partners.astro             # Supplier partnerships
+  styles/
+    global.css                 # Tailwind import + @theme CSS vars
 public/
-  favicon.svg            # SVG favicon (tile diamond design)
-  pwa-192.png            # PWA icon 192x192
-  pwa-512.png            # PWA icon 512x512
-  apple-touch-icon.png   # iOS home screen icon
+  favicon.svg                  # Brown AT monogram
+  pwa-192.png, pwa-512.png     # PWA icons
+  apple-touch-icon.png         # iOS home screen icon
 worker/
-  src/index.js           # Cloudflare Worker — /generate endpoint
-  wrangler.toml          # Worker config
+  src/index.js                 # Cloudflare Worker — /generate endpoint
+  wrangler.toml                # R2 binding + rate limiter binding
+astro.config.ts                # Integrations + PWA manifest config
 ```
 
 ## Config-Driven Architecture
 
-**`src/config.js`** is the single source of truth. Edit it to change:
+**`src/config.ts`** is the single source of truth. Edit it to change:
 
 - Business name, phone, address, hours
 - All CTA buttons and links (booking, email, phone)
@@ -83,14 +90,14 @@ worker/
 - Community events and involvement
 - YouTube video IDs
 - Supplier logos
+- Studio worker URL
 
 ## Commands
 
 ```bash
-npm run dev              # Vite dev server
+npm run dev              # Astro dev server
 npm run build            # Production build -> dist/
 npm run preview          # Preview production build
-npm run lint             # ESLint
 
 cd worker && npx wrangler dev    # Worker local dev
 cd worker && wrangler deploy     # Deploy worker
@@ -103,12 +110,19 @@ Set via `wrangler secret put` (these do NOT go in the frontend):
 - `GEMINI_KEY` — Google Gemini API key
 - `OPENAI_KEY` — OpenAI API key (fallback)
 
+## Worker Security
+
+- **Origin allowlist** — only accepts browser requests from `allthingsflooringntile.com`, `*.all-things.pages.dev` previews, and localhost dev ports
+- **Rate limit** — 10 requests / 60 seconds / IP via Cloudflare's native ratelimit binding
+- `/health` endpoint is open (no origin check, no rate limit)
+
 ## Cloudflare Pages Setup
 
 1. Connect this GitHub repo in Cloudflare Pages dashboard
 2. Build command: `npm run build`
 3. Output directory: `dist`
-4. That's it — push to `master` = auto deploy
+4. Custom domain: `allthingsflooringntile.com`
+5. Push to `master` = auto deploy
 
 ## Contact
 

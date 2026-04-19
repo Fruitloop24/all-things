@@ -1,0 +1,48 @@
+---
+import { CONFIG } from '../config'
+
+const email = CONFIG.cta.email.href.replace(/^mailto:/, '')
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'HomeAndConstructionBusiness',
+  name: CONFIG.appName,
+  image: new URL('/pwa-512.png', Astro.site).toString(),
+  telephone: CONFIG.phone.display,
+  email,
+  url: Astro.site?.toString(),
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: CONFIG.address.street,
+    addressLocality: CONFIG.address.city,
+    addressRegion: CONFIG.address.state,
+    postalCode: CONFIG.address.zip,
+    addressCountry: 'US',
+  },
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: 32.1965,
+    longitude: -83.1763,
+  },
+  areaServed: [
+    'Eastman',
+    'Dodge County',
+    'McRae-Helena',
+    'Cochran',
+    'Telfair County',
+  ].map((name) => ({ '@type': 'City', name })),
+  openingHoursSpecification: [
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      opens: '08:00',
+      closes: '16:00',
+    },
+  ],
+  priceRange: '$$',
+  description: CONFIG.hero.subheadline,
+  foundingDate: String(CONFIG.yearStarted),
+}
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

@@ -8,3 +8,10 @@ ENVIRONMENT = "production"
 [[r2_buckets]]
 binding = "R2"
 bucket_name = "cerul-social-media"
+
+# Cloudflare native rate limiter — 10 requests per 60s per key (IP)
+[[unsafe.bindings]]
+name = "RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "1001"
+simple = { limit = 10, period = 60 }

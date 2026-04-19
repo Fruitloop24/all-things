@@ -1,0 +1,581 @@
+---
+import Base from '../layouts/Base.astro'
+import QRCode from 'qrcode'
+import { CONFIG } from '../config'
+
+const projects = CONFIG.images.projects
+const testimonials = CONFIG.testimonials
+const suppliers = CONFIG.suppliers
+
+const qrSvg = await QRCode.toString('https://all-things.pages.dev/', {
+  type: 'svg',
+  color: { dark: '#1a2744', light: '#ffffff' },
+  margin: 0,
+  width: 200,
+})
+---
+
+<Base>
+  <!-- ════════════ 1. HERO ════════════ -->
+  <section class="relative overflow-hidden bg-warm-900 text-white min-h-[70vh] flex items-center">
+    <div class="absolute inset-0">
+      <img
+        src={CONFIG.images.hero}
+        alt=""
+        class="absolute inset-0 w-full h-full object-cover opacity-80"
+        loading="eager"
+      />
+      <div class="absolute inset-0 bg-gradient-to-r from-warm-900/80 via-warm-900/40 to-transparent"></div>
+      <div class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-warm-900"></div>
+    </div>
+
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 w-full">
+      <div class="max-w-2xl">
+        <div data-reveal class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/10 px-4 py-2 rounded-full text-sm text-warm-200 mb-6">
+          <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+          {CONFIG.hero.badge}
+        </div>
+        <h1 data-reveal data-reveal-delay="100" class="font-heading text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] mb-6">
+          Your Hometown{' '}<span class="text-warm-300">Flooring Experts</span>
+        </h1>
+        <p data-reveal data-reveal-delay="200" class="text-lg sm:text-xl text-warm-200/90 leading-relaxed mb-8 max-w-lg">
+          Premium floors, honest prices, and neighbors you can trust. Visit our showroom in {CONFIG.address.city} or book a free on-site estimate.
+        </p>
+        <div data-reveal data-reveal-delay="300" class="flex flex-col sm:flex-row gap-4">
+          <a
+            href={CONFIG.cta.primary.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center justify-center gap-2.5 bg-white text-warm-800 hover:bg-warm-100 px-8 py-4 rounded-xl text-base font-semibold transition-all no-underline shadow-lg shadow-black/20 hover:shadow-xl hover:-translate-y-0.5"
+          >
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+            </svg>
+            {CONFIG.cta.primary.text}
+          </a>
+          <a
+            href={CONFIG.cta.call.href}
+            class="inline-flex items-center justify-center gap-2.5 border-2 border-warm-400/60 text-white hover:bg-white/10 px-8 py-4 rounded-xl text-base font-semibold transition-all no-underline backdrop-blur-sm"
+          >
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+            </svg>
+            {CONFIG.cta.call.text}
+          </a>
+        </div>
+        <div data-reveal data-reveal-delay="400" class="flex items-center gap-6 mt-8 pt-6 border-t border-white/10">
+          <div class="flex gap-0.5">
+            {Array.from({ length: 5 }).map(() => (
+              <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+            ))}
+          </div>
+          <p class="text-warm-300 text-sm">
+            Trusted by <strong class="text-white">{CONFIG.trustCount}</strong> homeowners
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ 2. DESIGN STUDIO — the moat ════════════ -->
+  <section class="relative py-16 md:py-24 bg-white overflow-hidden">
+    <div
+      class="absolute inset-0 opacity-[0.02]"
+      style="background-image: repeating-linear-gradient(90deg, transparent, transparent 58px, rgba(0,0,0,0.15) 58px, rgba(0,0,0,0.15) 60px);"
+    ></div>
+
+    <div class="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div data-reveal class="text-center mb-14">
+        <div class="inline-flex items-center gap-2 bg-warm-100 text-warm-700 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase mb-4">
+          <span class="w-1.5 h-1.5 bg-warm-500 rounded-full"></span>
+          Only at All Things
+        </div>
+        <h2 class="font-heading text-3xl md:text-4xl lg:text-5xl font-bold text-stone-900 mb-4">
+          See Your New Floors <span class="text-warm-600">Before We Install</span>
+        </h2>
+        <p class="text-stone-500 text-lg max-w-2xl mx-auto">
+          No other flooring store in the area can do this. Upload a photo of your room, pick a floor, and see it transformed — plus get a price estimate on the spot.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <a href="/studio" data-reveal class="group no-underline">
+          <div class="relative bg-gradient-to-br from-warm-800 to-warm-900 rounded-2xl p-8 h-full overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-warm-700/30 rounded-full -translate-y-12 translate-x-12"></div>
+            <div class="relative">
+              <div class="w-14 h-14 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-6 group-hover:bg-white/20 transition-colors">
+                <svg class="w-7 h-7 text-warm-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+                </svg>
+              </div>
+              <h3 class="font-heading text-xl font-bold text-white mb-2">Room Visualizer</h3>
+              <p class="text-warm-300 text-sm leading-relaxed mb-6">
+                Upload a photo of any room. Pick your floor. See it installed — realistic, instant, free.
+              </p>
+              <span class="inline-flex items-center gap-1.5 text-warm-300 text-sm font-semibold group-hover:text-white transition-colors">
+                Try it now
+                <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+              </span>
+            </div>
+          </div>
+        </a>
+
+        <a href="/studio" data-reveal data-reveal-delay="100" class="group no-underline">
+          <div class="relative bg-gradient-to-br from-stone-800 to-stone-900 rounded-2xl p-8 h-full overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-stone-700/30 rounded-full -translate-y-12 translate-x-12"></div>
+            <div class="relative">
+              <div class="w-14 h-14 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-6 group-hover:bg-white/20 transition-colors">
+                <svg class="w-7 h-7 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 15.75V18m-7.5-6.75h.008v.008H8.25v-.008zm0 2.25h.008v.008H8.25V13.5zm0 2.25h.008v.008H8.25v-.008zm0 2.25h.008v.008H8.25V18zm2.498-6.75h.007v.008h-.007v-.008zm0 2.25h.007v.008h-.007V13.5zm0 2.25h.007v.008h-.007v-.008zm0 2.25h.007v.008h-.007V18zm2.504-6.75h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V13.5zm0 2.25h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V18zm2.498-6.75h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V13.5zM8.25 6h7.5v2.25h-7.5V6zM12 2.25c-1.892 0-3.758.11-5.593.322C5.307 2.7 4.5 3.65 4.5 4.757V19.5a2.25 2.25 0 002.25 2.25h10.5a2.25 2.25 0 002.25-2.25V4.757c0-1.108-.806-2.057-1.907-2.185A48.507 48.507 0 0012 2.25z" />
+                </svg>
+              </div>
+              <h3 class="font-heading text-xl font-bold text-white mb-2">Cost Calculator</h3>
+              <p class="text-stone-300 text-sm leading-relaxed mb-6">
+                Pick your room size, floor type, and extras. Get a real estimate — materials, labor, the works.
+              </p>
+              <span class="inline-flex items-center gap-1.5 text-stone-300 text-sm font-semibold group-hover:text-white transition-colors">
+                Try it out
+                <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+              </span>
+            </div>
+          </div>
+        </a>
+
+        <a
+          href={CONFIG.cta.primary.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-reveal
+          data-reveal-delay="200"
+          class="group no-underline"
+        >
+          <div class="relative bg-gradient-to-br from-warm-600 to-warm-700 rounded-2xl p-8 h-full overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-warm-500/30 rounded-full -translate-y-12 translate-x-12"></div>
+            <div class="relative">
+              <div class="w-14 h-14 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-6 group-hover:bg-white/20 transition-colors">
+                <svg class="w-7 h-7 text-warm-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" />
+                </svg>
+              </div>
+              <h3 class="font-heading text-xl font-bold text-white mb-2">Free On-Site Estimate</h3>
+              <p class="text-warm-200 text-sm leading-relaxed mb-6">
+                Want us to come to you? Book a time and we'll measure, quote, and answer every question — no pressure.
+              </p>
+              <span class="inline-flex items-center gap-1.5 text-warm-200 text-sm font-semibold group-hover:text-white transition-colors">
+                Book now
+                <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+              </span>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ 3. PROJECT SHOWCASE — auto-rotating ════════════ -->
+  <section class="py-16 md:py-24 bg-warm-50">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div data-reveal class="text-center mb-10">
+        <p class="text-warm-500 text-sm font-semibold tracking-widest uppercase mb-3">Our Work</p>
+        <h2 class="font-heading text-3xl md:text-4xl font-bold text-stone-900">Floors We're Proud Of</h2>
+      </div>
+
+      <div data-reveal class="relative" id="project-carousel">
+        <div class="rounded-2xl overflow-hidden shadow-lg border border-warm-200 aspect-[16/9] relative">
+          {
+            projects.map((project, idx) => (
+              <div
+                class:list={[
+                  'project-slide absolute inset-0 transition-opacity duration-700',
+                  idx === 0 ? 'opacity-100' : 'opacity-0',
+                ]}
+                data-index={idx}
+              >
+                <img src={project.src} alt={project.title} class="w-full h-full object-cover" loading="lazy" />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                <div class="absolute bottom-0 left-0 right-0 p-6">
+                  <h3 class="font-heading text-xl font-bold text-white">{project.title}</h3>
+                  <p class="text-white/70 text-sm">{project.location}</p>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+        <div class="flex justify-center gap-2 mt-5">
+          {
+            projects.map((_, i) => (
+              <button
+                type="button"
+                class:list={[
+                  'project-dot h-1.5 rounded-full transition-all cursor-pointer',
+                  i === 0 ? 'w-8 bg-warm-500' : 'w-1.5 bg-warm-200 hover:bg-warm-300',
+                ]}
+                data-index={i}
+                aria-label={`View project ${i + 1}`}
+              />
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ 4. TESTIMONIALS CAROUSEL ════════════ -->
+  <section class="py-16 md:py-24 bg-white texture-overlay">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div data-reveal class="text-center mb-12">
+        <p class="text-warm-500 text-sm font-semibold tracking-widest uppercase mb-3">Testimonials</p>
+        <h2 class="font-heading text-3xl md:text-4xl font-bold text-stone-900">What Our Customers Say</h2>
+      </div>
+
+      <div data-reveal class="max-w-3xl mx-auto" id="testimonial-carousel">
+        <div class="bg-warm-50 rounded-2xl shadow-sm border border-warm-100 p-8 md:p-12 relative min-h-[260px]">
+          <svg class="absolute top-6 left-8 w-10 h-10 text-warm-200/60" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179zm10 0C13.553 16.227 13 15 13 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179z" />
+          </svg>
+
+          {
+            testimonials.map((t, i) => (
+              <div
+                class:list={[
+                  'testimonial-slide',
+                  i === 0 ? 'block' : 'hidden',
+                ]}
+                data-index={i}
+              >
+                <div class="relative">
+                  <div class="flex gap-1 mb-4">
+                    {Array.from({ length: t.rating }).map(() => (
+                      <svg class="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    ))}
+                  </div>
+                  <p class="text-stone-600 text-lg leading-relaxed mb-6 italic">"{t.text}"</p>
+                </div>
+                <div class="flex items-center justify-between">
+                  <div>
+                    <div class="font-semibold text-stone-800">{t.name}</div>
+                    <div class="text-sm text-stone-400">
+                      {t.location} — {t.project}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          }
+
+          <div class="flex items-center justify-between mt-6">
+            <div></div>
+            <div class="flex gap-2">
+              <button
+                type="button"
+                id="testimonial-prev"
+                class="w-10 h-10 rounded-full border border-warm-200 hover:bg-warm-100 flex items-center justify-center text-stone-500 hover:text-warm-700 transition-colors cursor-pointer"
+                aria-label="Previous testimonial"
+              >
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                id="testimonial-next"
+                class="w-10 h-10 rounded-full border border-warm-200 hover:bg-warm-100 flex items-center justify-center text-stone-500 hover:text-warm-700 transition-colors cursor-pointer"
+                aria-label="Next testimonial"
+              >
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="flex justify-center gap-2 mt-5">
+            {
+              testimonials.map((_, i) => (
+                <button
+                  type="button"
+                  class:list={[
+                    'testimonial-dot h-1.5 rounded-full transition-all cursor-pointer',
+                    i === 0 ? 'w-8 bg-warm-500' : 'w-1.5 bg-warm-200 hover:bg-warm-300',
+                  ]}
+                  data-index={i}
+                  aria-label={`Go to testimonial ${i + 1}`}
+                />
+              ))
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ 5. SUPPLIER LOGOS BAR ════════════ -->
+  <section class="py-14 bg-warm-50 border-y border-warm-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <p data-reveal class="text-center text-xs font-semibold tracking-widest uppercase text-stone-400 mb-8">
+        Proud to carry brands you trust
+      </p>
+      <div data-reveal data-reveal-delay="100" class="flex flex-wrap items-center justify-center gap-x-10 gap-y-6">
+        {
+          suppliers.map((s) => (
+            <div class="flex items-center justify-center px-5 py-3 rounded-lg bg-white border border-stone-100 hover:border-warm-300 hover:shadow-sm transition-all">
+              <img src={s.logo} alt={s.name} class="h-14 md:h-16 w-auto object-contain" loading="lazy" />
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ 6. GET THE APP ════════════ -->
+  <section class="py-16 bg-white">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div data-reveal class="bg-gradient-to-br from-warm-50 to-warm-100 rounded-2xl border border-warm-200 p-8 md:p-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+          <div>
+            <p class="text-warm-500 text-sm font-semibold tracking-widest uppercase mb-2">Get the App</p>
+            <h2 class="font-heading text-2xl md:text-3xl font-bold text-stone-900 mb-4">Take Us With You</h2>
+            <p class="text-stone-600 leading-relaxed mb-6">
+              Get our app — AI floor visualizer, cost calculator, and more right on your phone. Scan the QR code or follow the steps below to install.
+            </p>
+            <div class="space-y-3">
+              <div class="flex items-start gap-3">
+                <span class="w-7 h-7 bg-warm-700 text-white rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">1</span>
+                <p class="text-stone-600 text-sm">
+                  <strong class="text-stone-800">iPhone:</strong> Tap the share button (box with arrow) in Safari, then tap <strong>"Add to Home Screen."</strong>
+                </p>
+              </div>
+              <div class="flex items-start gap-3">
+                <span class="w-7 h-7 bg-warm-700 text-white rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">2</span>
+                <p class="text-stone-600 text-sm">
+                  <strong class="text-stone-800">Android:</strong> Tap the menu (three dots) in Chrome, then tap <strong>"Add to Home Screen"</strong> or <strong>"Install App."</strong>
+                </p>
+              </div>
+              <div class="flex items-start gap-3">
+                <span class="w-7 h-7 bg-warm-700 text-white rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">3</span>
+                <p class="text-stone-600 text-sm">
+                  <strong class="text-stone-800">That's it!</strong> It's an app — right on your home screen, always up to date.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col items-center">
+            <div class="bg-white rounded-2xl p-6 shadow-md border border-warm-100">
+              <div set:html={qrSvg} style="width: 200px; height: 200px;" />
+            </div>
+            <p class="text-stone-400 text-xs mt-3 text-center">Scan with your phone camera to open the site</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ 7. SHOWROOM CTA ════════════ -->
+  <section class="py-16 md:py-24 bg-gradient-to-br from-warm-800 via-warm-800 to-warm-900 text-white relative overflow-hidden">
+    <div
+      class="absolute inset-0 opacity-[0.04]"
+      style="background-image: repeating-linear-gradient(90deg, transparent, transparent 58px, rgba(255,255,255,0.2) 58px, rgba(255,255,255,0.2) 60px);"
+    ></div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div data-reveal>
+          <h2 class="font-heading text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-6">
+            {CONFIG.showroom.headline}
+          </h2>
+          <p class="text-warm-200 text-lg leading-relaxed mb-10 max-w-lg">
+            {CONFIG.showroom.subheadline}
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4">
+            <a
+              href={CONFIG.cta.primary.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center justify-center gap-2.5 bg-white text-warm-800 hover:bg-warm-100 px-8 py-4 rounded-xl font-semibold transition-all no-underline shadow-lg"
+            >
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+              </svg>
+              {CONFIG.cta.primary.text}
+            </a>
+            <a
+              href={CONFIG.cta.call.href}
+              class="inline-flex items-center justify-center gap-2.5 border-2 border-warm-400/60 text-white hover:bg-white/10 px-8 py-4 rounded-xl font-semibold transition-all no-underline"
+            >
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+              </svg>
+              {CONFIG.cta.call.text}
+            </a>
+          </div>
+        </div>
+
+        <div data-reveal data-reveal-delay="150" class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 space-y-6">
+          <div class="flex gap-4">
+            <div class="w-11 h-11 bg-warm-600/30 rounded-xl flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5 text-warm-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+              </svg>
+            </div>
+            <div>
+              <div class="text-sm font-semibold text-white mb-1">Address</div>
+              <div class="text-sm text-warm-300">{CONFIG.address.street}</div>
+              <div class="text-sm text-warm-300">{CONFIG.address.city}, {CONFIG.address.state} {CONFIG.address.zip}</div>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div class="w-11 h-11 bg-warm-600/30 rounded-xl flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5 text-warm-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <div class="text-sm font-semibold text-white mb-1">Store Hours</div>
+              <div class="text-sm text-warm-300">{CONFIG.hours.weekday}</div>
+              <div class="text-sm text-warm-400">{CONFIG.hours.weekend}</div>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div class="w-11 h-11 bg-warm-600/30 rounded-xl flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5 text-warm-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+              </svg>
+            </div>
+            <div>
+              <div class="text-sm font-semibold text-white mb-1">Phone</div>
+              <a href={CONFIG.phone.href} class="text-sm text-warm-300 hover:text-white transition-colors no-underline">
+                {CONFIG.phone.display}
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ STICKY MOBILE CTA ════════════ -->
+  <div class="md:hidden fixed bottom-16 left-0 right-0 z-40 px-4 pb-2">
+    <a
+      href={CONFIG.cta.mobileCta.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="flex items-center justify-center gap-2 w-full bg-warm-700 hover:bg-warm-800 text-white py-3.5 rounded-xl font-semibold shadow-lg shadow-warm-900/30 no-underline text-sm"
+    >
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+      </svg>
+      {CONFIG.cta.mobileCta.text}
+    </a>
+  </div>
+</Base>
+
+<style>
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(2rem);
+    transition: opacity 700ms ease-out, transform 700ms ease-out;
+  }
+  [data-reveal].is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+
+<script>
+  // Reveal-on-scroll
+  const revealEls = document.querySelectorAll<HTMLElement>('[data-reveal]')
+  const obs = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const el = entry.target as HTMLElement
+          const delay = Number(el.dataset.revealDelay ?? 0)
+          setTimeout(() => el.classList.add('is-visible'), delay)
+          obs.unobserve(el)
+        }
+      })
+    },
+    { threshold: 0.15 }
+  )
+  revealEls.forEach((el) => obs.observe(el))
+
+  // Project carousel — auto-rotate 3s
+  const projectCarousel = document.getElementById('project-carousel')
+  if (projectCarousel) {
+    const slides = projectCarousel.querySelectorAll<HTMLElement>('.project-slide')
+    const dots = projectCarousel.querySelectorAll<HTMLElement>('.project-dot')
+    let projectIdx = 0
+    const showProject = (i: number) => {
+      projectIdx = i
+      slides.forEach((s, si) => s.classList.toggle('opacity-100', si === i))
+      slides.forEach((s, si) => s.classList.toggle('opacity-0', si !== i))
+      dots.forEach((d, di) => {
+        d.classList.toggle('w-8', di === i)
+        d.classList.toggle('bg-warm-500', di === i)
+        d.classList.toggle('w-1.5', di !== i)
+        d.classList.toggle('bg-warm-200', di !== i)
+      })
+    }
+    let projectTimer = setInterval(() => showProject((projectIdx + 1) % slides.length), 3000)
+    dots.forEach((d) =>
+      d.addEventListener('click', () => {
+        const i = Number(d.dataset.index)
+        showProject(i)
+        clearInterval(projectTimer)
+        projectTimer = setInterval(() => showProject((projectIdx + 1) % slides.length), 3000)
+      })
+    )
+  }
+
+  // Testimonial carousel — auto-rotate 6s
+  const tCarousel = document.getElementById('testimonial-carousel')
+  if (tCarousel) {
+    const slides = tCarousel.querySelectorAll<HTMLElement>('.testimonial-slide')
+    const dots = tCarousel.querySelectorAll<HTMLElement>('.testimonial-dot')
+    const prevBtn = document.getElementById('testimonial-prev')
+    const nextBtn = document.getElementById('testimonial-next')
+    let tIdx = 0
+    const showT = (i: number) => {
+      tIdx = (i + slides.length) % slides.length
+      slides.forEach((s, si) => {
+        s.classList.toggle('block', si === tIdx)
+        s.classList.toggle('hidden', si !== tIdx)
+      })
+      dots.forEach((d, di) => {
+        d.classList.toggle('w-8', di === tIdx)
+        d.classList.toggle('bg-warm-500', di === tIdx)
+        d.classList.toggle('w-1.5', di !== tIdx)
+        d.classList.toggle('bg-warm-200', di !== tIdx)
+      })
+    }
+    let tTimer = setInterval(() => showT(tIdx + 1), 6000)
+    const reset = () => {
+      clearInterval(tTimer)
+      tTimer = setInterval(() => showT(tIdx + 1), 6000)
+    }
+    prevBtn?.addEventListener('click', () => {
+      showT(tIdx - 1)
+      reset()
+    })
+    nextBtn?.addEventListener('click', () => {
+      showT(tIdx + 1)
+      reset()
+    })
+    dots.forEach((d) =>
+      d.addEventListener('click', () => {
+        showT(Number(d.dataset.index))
+        reset()
+      })
+    )
+  }
+</script>

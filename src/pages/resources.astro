@@ -1,0 +1,129 @@
+---
+import Base from '../layouts/Base.astro'
+import SqFtChallenge from '../components/SqFtChallenge'
+import { CONFIG } from '../config'
+
+const { resources } = CONFIG
+---
+
+<Base title="Resources" description="Flooring tips, how-to guides, and expert advice to help you make the best decisions for your floors.">
+  <section class="relative bg-gradient-to-br from-warm-900 via-warm-800 to-warm-700 text-white py-16 md:py-20 text-center">
+    <div class="relative max-w-3xl mx-auto px-4">
+      <p class="text-warm-300 text-sm font-semibold tracking-widest uppercase mb-3">Learn &amp; Grow</p>
+      <h1 class="font-heading text-3xl md:text-5xl font-bold mb-4">
+        Flooring <span class="text-warm-300">Resources</span>
+      </h1>
+      <p class="text-warm-200/90 text-lg leading-relaxed max-w-xl mx-auto">
+        Tips, how-to guides, and expert advice to help you make the best decisions for your floors — whether you hire us or DIY.
+      </p>
+    </div>
+  </section>
+
+  <section class="py-16 bg-warm-50">
+    <div class="max-w-2xl mx-auto px-4 text-center">
+      <h2 class="font-heading text-2xl font-bold text-stone-900 mb-2">Stay in the Loop</h2>
+      <p class="text-stone-500 text-sm mb-6">Get flooring tips, seasonal deals, and project inspiration delivered to your inbox.</p>
+      <iframe
+        src="https://docs.google.com/forms/d/e/1FAIpQLScynL1leHYPZlZNng9AVmOpbBlNzO-913rA5-tWmmcxD5I7HQ/viewform?embedded=true"
+        class="w-full border-0 rounded-xl bg-white"
+        style="min-height: 320px;"
+        title="Newsletter Signup"
+        loading="lazy"></iframe>
+    </div>
+  </section>
+
+  <section class="py-16 bg-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <p class="text-warm-500 text-sm font-semibold tracking-widest uppercase mb-2">Guides</p>
+        <h2 class="font-heading text-2xl md:text-3xl font-bold text-stone-900">Helpful Articles</h2>
+      </div>
+
+      <article class="bg-warm-50 rounded-2xl p-6 md:p-8 border border-warm-100">
+        <span class="text-xs font-bold text-warm-500 uppercase tracking-widest">DIY Basics</span>
+        <h3 class="font-heading text-xl font-bold text-stone-900 mt-2 mb-3">How to Measure Your Room's Square Footage</h3>
+        <p class="text-stone-600 leading-relaxed mb-4">
+          Before you shop for flooring, you need to know how much you need. It's easier than you think — grab a tape measure, a pen, and follow these steps.
+        </p>
+        <ol class="text-stone-600 text-sm space-y-2 mb-4 list-decimal list-inside">
+          <li><strong>Measure length and width</strong> of the room in feet. Round up to the nearest half-foot.</li>
+          <li><strong>Multiply length x width</strong> to get your square footage. A 12ft x 14ft room = 168 sq ft.</li>
+          <li><strong>Add 10% for waste</strong> — cuts, mistakes, and pattern matching. So 168 + 17 = 185 sq ft to order.</li>
+          <li><strong>Odd-shaped rooms?</strong> Break them into rectangles, measure each one, and add them up.</li>
+          <li><strong>Closets and nooks</strong> — measure separately and add to your total.</li>
+        </ol>
+        <p class="text-stone-500 text-sm">
+          Want it done for you?
+          <a href={CONFIG.cta.primary.href} target="_blank" rel="noopener noreferrer" class="text-warm-600 font-semibold hover:text-warm-700 no-underline">Book a free estimate</a>
+          and we'll handle the measuring. Or try our
+          <a href="/studio" class="text-warm-600 font-semibold hover:text-warm-700 no-underline">Cost Calculator</a>
+          to get a ballpark price right now.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <section class="py-16 bg-warm-50">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-8">
+        <p class="text-warm-500 text-sm font-semibold tracking-widest uppercase mb-2">Practice</p>
+        <h2 class="font-heading text-2xl md:text-3xl font-bold text-stone-900 mb-2">Test Your Skills</h2>
+        <p class="text-stone-500 max-w-lg mx-auto">Read the article above, then see if you can calculate the square footage of these odd-shaped rooms.</p>
+      </div>
+      <SqFtChallenge client:visible />
+    </div>
+  </section>
+
+  <section class="py-16 bg-white">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-10">
+        <p class="text-warm-500 text-sm font-semibold tracking-widest uppercase mb-2">Video Tips</p>
+        <h2 class="font-heading text-2xl md:text-3xl font-bold text-stone-900 mb-2">DIY &amp; Pro Tips</h2>
+        <p class="text-stone-500 max-w-lg mx-auto">Helpful videos from around YouTube to get you started.</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {
+          resources.youtube.map((vid) => (
+            <div class="bg-warm-50 rounded-2xl overflow-hidden border border-warm-100">
+              <div class="aspect-video">
+                <iframe
+                  src={`https://www.youtube.com/embed/${vid.id}`}
+                  title={vid.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowfullscreen
+                  loading="lazy"
+                  class="w-full h-full border-0"></iframe>
+              </div>
+              <div class="p-4">
+                <h3 class="font-heading text-sm font-bold text-stone-900">{vid.title}</h3>
+                <p class="text-stone-400 text-xs mt-1">{vid.channel}</p>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="py-16 bg-warm-50 text-center">
+    <div class="max-w-xl mx-auto px-4">
+      <h2 class="font-heading text-2xl md:text-3xl font-bold text-stone-900 mb-4">Got Questions?</h2>
+      <p class="text-stone-500 mb-8">We're always happy to help — shoot us an email or give us a call.</p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a
+          href={CONFIG.cta.email.href}
+          class="inline-flex items-center justify-center gap-2 bg-warm-700 hover:bg-warm-800 text-white px-8 py-4 rounded-xl font-semibold transition-all no-underline shadow-md"
+        >
+          {CONFIG.cta.email.text}
+        </a>
+        <a
+          href={CONFIG.cta.call.href}
+          class="inline-flex items-center justify-center gap-2 border-2 border-warm-300 text-warm-700 hover:bg-warm-100 px-8 py-4 rounded-xl font-semibold transition-all no-underline"
+        >
+          {CONFIG.cta.call.text}
+        </a>
+      </div>
+    </div>
+  </section>
+</Base>

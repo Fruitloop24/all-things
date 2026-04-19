@@ -1,26 +1,54 @@
 /**
  * Room Studio Worker
  * One endpoint: POST /generate
+ * - Origin allowlist (browser requests only from the marketing site)
+ * - Rate limited: 10 requests / 60s / IP (Cloudflare ratelimit binding)
  * - Takes room photo + flooring sample
  * - Uploads both to R2 all-thing/uploads/
- * - Scans room with Gemini → JSON analysis
- * - Scans flooring with Gemini → JSON analysis
+ * - Scans room + flooring with Gemini → JSON analysis
  * - Sends both photos + both JSONs to Gemini → edits the room photo with new floor
  * - Saves analyses + edited image to R2 all-thing/downloads/
- * - Returns edited image
  * - Falls back to ChatGPT/OpenAI if Gemini slips
  */
 
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-};
+const ALLOWED_ORIGINS = new Set([
+  'https://allthingsflooringntile.com',
+  'https://www.allthingsflooringntile.com',
+  'https://all-things.pages.dev',
+  'http://localhost:4321',
+  'http://localhost:4322',
+  'http://localhost:4323',
+]);
 
-function jsonResponse(data, status = 200) {
+// CF Pages preview deploys: <hash>.all-things.pages.dev
+const ALLOWED_ORIGIN_SUFFIXES = ['.all-things.pages.dev'];
+
+function isAllowedOrigin(origin) {
+  if (!origin) return false;
+  if (ALLOWED_ORIGINS.has(origin)) return true;
+  try {
+    const { hostname, protocol } = new URL(origin);
+    if (protocol !== 'https:' && protocol !== 'http:') return false;
+    return ALLOWED_ORIGIN_SUFFIXES.some((suffix) => hostname.endsWith(suffix));
+  } catch {
+    return false;
+  }
+}
+
+function corsHeadersFor(origin) {
+  const allowed = isAllowedOrigin(origin);
+  return {
+    'Access-Control-Allow-Origin': allowed ? origin : 'null',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Vary': 'Origin',
+  };
+}
+
+function jsonResponse(data, status, origin) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
+    headers: { 'Content-Type': 'application/json', ...corsHeadersFor(origin) },
   });
 }
 
@@ -30,26 +58,50 @@ function generateId() {
 
 export default {
   async fetch(request, env) {
-    if (request.method === 'OPTIONS') {
-      return new Response(null, { status: 204, headers: CORS_HEADERS });
-    }
-
+    const origin = request.headers.get('Origin');
     const url = new URL(request.url);
     const path = url.pathname;
 
+    // Preflight
+    if (request.method === 'OPTIONS') {
+      if (!isAllowedOrigin(origin)) {
+        return new Response(null, { status: 403 });
+      }
+      return new Response(null, { status: 204, headers: corsHeadersFor(origin) });
+    }
+
+    // Health check — no origin check, no rate limit
+    if (path === '/health') {
+      return jsonResponse({ status: 'ok', timestamp: new Date().toISOString() }, 200, origin);
+    }
+
+    // Enforce origin allowlist for all other routes
+    if (!isAllowedOrigin(origin)) {
+      return jsonResponse({ error: 'Forbidden origin' }, 403, origin);
+    }
+
+    // Rate limit by client IP (bound to this edge location)
+    if (env.RATE_LIMITER) {
+      const ip = request.headers.get('cf-connecting-ip') ?? 'anonymous';
+      try {
+        const { success } = await env.RATE_LIMITER.limit({ key: ip });
+        if (!success) {
+          return jsonResponse({ error: 'Too many requests. Please slow down.' }, 429, origin);
+        }
+      } catch (err) {
+        console.error('Rate limiter error (allowing request):', err.message);
+      }
+    }
+
     try {
       if (path === '/generate' && request.method === 'POST') {
-        return handleGenerate(request, env);
+        return handleGenerate(request, env, origin);
       }
 
-      if (path === '/health') {
-        return jsonResponse({ status: 'ok', timestamp: new Date().toISOString() });
-      }
-
-      return jsonResponse({ error: 'Not found' }, 404);
+      return jsonResponse({ error: 'Not found' }, 404, origin);
     } catch (err) {
       console.error('Worker error:', err);
-      return jsonResponse({ error: 'Internal server error', detail: err.message }, 500);
+      return jsonResponse({ error: 'Internal server error', detail: err.message }, 500, origin);
     }
   },
 };
@@ -57,17 +109,17 @@ export default {
 /**
  * THE ONE CALL — user hits generate, we do everything
  */
-async function handleGenerate(request, env) {
+async function handleGenerate(request, env, origin) {
   const formData = await request.formData();
   const roomFile = formData.get('roomImage');
   const flooringFile = formData.get('flooringImage');
-  const flooringDesc = formData.get('flooringDescription'); // preset text
+  const flooringDesc = formData.get('flooringDescription');
 
   if (!roomFile) {
-    return jsonResponse({ error: 'roomImage is required' }, 400);
+    return jsonResponse({ error: 'roomImage is required' }, 400, origin);
   }
   if (!flooringFile && !flooringDesc) {
-    return jsonResponse({ error: 'Need flooringImage or flooringDescription' }, 400);
+    return jsonResponse({ error: 'Need flooringImage or flooringDescription' }, 400, origin);
   }
 
   const id = generateId();
@@ -83,7 +135,6 @@ async function handleGenerate(request, env) {
     flooringMime = flooringFile.type || 'image/jpeg';
   }
 
-  // ── Upload to R2 ──
   const roomKey = `all-thing/uploads/room-${id}.jpg`;
   const r2Ops = [
     env.R2.put(roomKey, roomBytes, {
@@ -99,7 +150,6 @@ async function handleGenerate(request, env) {
   }
   await Promise.all(r2Ops);
 
-  // ── Scan room ──
   let roomAnalysis;
   let scanProvider = 'gemini';
   try {
@@ -107,25 +157,22 @@ async function handleGenerate(request, env) {
   } catch {
     scanProvider = 'chatgpt';
     try { roomAnalysis = await analyzeWithChatGPT(env, roomBase64, roomMime, 'room'); }
-    catch (e2) { return jsonResponse({ error: 'Room scan failed', detail: e2.message }, 502); }
+    catch (e2) { return jsonResponse({ error: 'Room scan failed', detail: e2.message }, 502, origin); }
   }
 
-  // ── Flooring context ──
   let flooringAnalysis;
   if (hasImage) {
     try { flooringAnalysis = await analyzeWithGemini(env, flooringBase64, flooringMime, 'flooring'); }
     catch {
       try { flooringAnalysis = await analyzeWithChatGPT(env, flooringBase64, flooringMime, 'flooring'); }
-      catch (e2) { return jsonResponse({ error: 'Flooring scan failed', detail: e2.message }, 502); }
+      catch (e2) { return jsonResponse({ error: 'Flooring scan failed', detail: e2.message }, 502, origin); }
     }
   }
 
-  // Save analyses
   await env.R2.put(`all-thing/downloads/room-analysis-${id}.json`, JSON.stringify(roomAnalysis, null, 2), {
     httpMetadata: { contentType: 'application/json' },
   });
 
-  // ── Build edit prompt ──
   const flooringContext = hasImage
     ? `Here is the analysis of the flooring sample (IMAGE 2):\n${JSON.stringify(flooringAnalysis, null, 2)}`
     : `The customer selected this flooring:\n${flooringDesc}`;
@@ -215,7 +262,7 @@ Do NOT change anything except the floor. Return the edited photo.`;
     console.error('Gemini image edit failed:', geminiErr.message);
 
     if (!env.OPENAI_KEY) {
-      return jsonResponse({ error: 'Image edit failed', detail: geminiErr.message }, 502);
+      return jsonResponse({ error: 'Image edit failed', detail: geminiErr.message }, 502, origin);
     }
 
     editProvider = 'chatgpt';
@@ -241,11 +288,10 @@ Do NOT change anything except the floor. Return the edited photo.`;
       if (!imageData) throw new Error('OpenAI returned no image');
       imageMime = 'image/png';
     } catch (oaiErr) {
-      return jsonResponse({ error: 'All providers failed', detail: oaiErr.message }, 502);
+      return jsonResponse({ error: 'All providers failed', detail: oaiErr.message }, 502, origin);
     }
   }
 
-  // Save edited image to R2
   const ext = imageMime.includes('png') ? 'png' : 'jpg';
   const imageKey = `all-thing/downloads/edited-room-${id}.${ext}`;
   await env.R2.put(imageKey, base64ToArrayBuffer(imageData), {
@@ -259,7 +305,7 @@ Do NOT change anything except the floor. Return the edited photo.`;
     designNotes,
     imageMime,
     imageBase64: imageData,
-  });
+  }, 200, origin);
 }
 
 // ── Gemini Vision Analysis ──
