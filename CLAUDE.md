@@ -55,7 +55,7 @@ tsconfig.json                    # Strict, Preact JSX runtime, react/react-dom a
 - **Interactivity via islands only:** The marketing site is static. Two Preact islands: `Studio.tsx` (`client:load` — AI visualizer + calculator) and `SqFtChallenge.tsx` (`client:visible` — sq ft game). Landing carousels and mobile menu use vanilla `<script>` blocks in Astro files.
 - **Booking CTA:** Primary CTAs point to Google Calendar booking (`CONFIG.booking`). Phone number is secondary. Header shows both.
 - **Worker AI pipeline:** Upload room + flooring images → R2 storage → Gemini analyzes both → Gemini edits room with new floor → saves to R2 → returns base64. Falls back to OpenAI if Gemini fails.
-- **CORS:** Worker uses wide-open `*` origin. No frontend URL allowlist to maintain.
+- **Worker security:** Origin allowlist (`allthingsflooringntile.com`, `www.` variant, `*.all-things.pages.dev` previews, localhost dev ports) enforced on `/generate`. `/health` is open. Rate limited to 10 req / 60s / IP via Cloudflare's native `[[unsafe.bindings]] type = "ratelimit"` binding.
 
 ## Commands
 
