@@ -233,6 +233,42 @@ export const CONFIG = {
     ],
   },
 
+  // ─── FAQ (homepage + JSON-LD schema) ───
+  faqs: [
+    {
+      q: 'Do you offer free estimates?',
+      a: "Yes — every estimate is free and no-obligation. Book online or give us a call and we'll come measure, answer your questions, and give you a straight-up price with no pressure.",
+    },
+    {
+      q: 'What areas do you serve?',
+      a: 'We serve Eastman, Dodge County, McRae-Helena, Cochran, Telfair County, and surrounding Middle Georgia communities. Not sure whether we cover your area? Just call us at (478) 231-7935.',
+    },
+    {
+      q: 'What types of flooring do you install?',
+      a: 'Hardwood, luxury vinyl plank (LVP), tile and stone, carpet, laminate, and commercial VCT. Whole-home or single-room, residential or commercial — we handle it.',
+    },
+    {
+      q: 'Can I see what new floors will look like in my room before I buy?',
+      a: "Yes — and we're the only flooring store in the area that can do this. Our free AI Room Visualizer lets you upload a photo of your room, pick a floor, and see it installed instantly. Try it on our Design Studio page.",
+    },
+    {
+      q: 'How long does flooring installation usually take?',
+      a: "Most single-room jobs are done in 1-2 days. Whole-house installs typically run 3-7 days depending on size, material, and subfloor prep. We'll give you an exact timeline with your written estimate.",
+    },
+    {
+      q: 'Do you remove old flooring and handle subfloor prep?',
+      a: 'Absolutely. We handle demo, haul-off, leveling, and any subfloor prep needed before the new floor goes down. Everything is itemized on your estimate — no hidden fees, no surprises.',
+    },
+    {
+      q: 'What flooring brands do you carry?',
+      a: 'We carry Shaw Floors, Mohawk, Armstrong, Daltile, COREtec, and more top-tier brands. Come by the Eastman showroom to see and feel hundreds of samples in person.',
+    },
+    {
+      q: 'Do you rent tools for DIY projects?',
+      a: "Yes — we rent professional flooring tools like tile saws, nailers, and rollers. Stop by the showroom and we're happy to give you DIY advice while you're picking up what you need.",
+    },
+  ],
+
   // ─── RESOURCES PAGE ───
   resources: {
     youtube: [

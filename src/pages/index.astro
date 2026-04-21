@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro'
+import FAQ from '../components/FAQ.astro'
 import QRCode from 'qrcode'
 import { CONFIG } from '../config'
 
@@ -380,7 +381,10 @@ const qrSvg = await QRCode.toString('https://allthingsflooringntile.com/', {
     </div>
   </section>
 
-  <!-- ════════════ 7. SHOWROOM CTA ════════════ -->
+  <!-- ════════════ 7. FAQ ════════════ -->
+  <FAQ />
+
+  <!-- ════════════ 8. SHOWROOM CTA ════════════ -->
   <section class="py-16 md:py-24 bg-gradient-to-br from-warm-800 via-warm-800 to-warm-900 text-white relative overflow-hidden">
     <div
       class="absolute inset-0 opacity-[0.04]"
