@@ -84,6 +84,22 @@ The worker requires these secrets (set via `wrangler secret put`):
 
 ## Current TODO
 
-- [ ] Swap CTA links to scheduler URL (verify `CONFIG.booking` is still correct)
-- [ ] Social links — update with real URLs
-- [ ] Replace placeholder before/after project images once real photos are ready
+### SEO — in-flight
+- [x] Google: all 7 pages indexed
+- [x] Bing: sitemap submitted at `https://allthingsflooringntile.com/sitemap-index.xml`
+- [x] H1 tags present on all 7 pages (`/studio` fixed 2026-04-23 — Bing flagged it as the only page missing an H1)
+- [ ] Expand `areaServed` in `src/components/SchemaLocalBusiness.astro` to cover neighbor towns + counties (McRae-Helena, Dublin, Cochran, Hawkinsville, Chauncey, Telfair, Laurens, Pulaski, Wilcox)
+- [ ] Per-town landing pages (same town list) — config-driven so the pattern is reusable as a template for other small-town trades
+- [ ] FAQ block on `/studio` (thin-content gap on flagship tool page)
+
+### Blocked on GBP
+**Waiting on Google Business Profile name-collision resolution** (Matt Oxley owns the "& Tile" listing — see memory). Do NOT start directory submissions until GBP name is locked — NAP (Name/Address/Phone) inconsistency across citations actively hurts local rank. Once unblocked:
+- [ ] Video verification — single continuous take, showroom + shop walkthrough, sign visible, name+address spoken. Team has TikTok video chops.
+- [ ] Batch-submit listings in one pass: Bing Places, Apple Maps, Facebook Business, Yelp, BBB, Angi, HomeAdvisor, Nextdoor, Dodge County Chamber
+- [ ] Supplier "find a dealer" backlink outreach (Shaw, Mohawk, Daltile, COREtec)
+- [ ] Embed Google Reviews + request review outreach (only after name is locked)
+
+### Content — replace placeholders
+- [ ] Social links — all four entries in `config.ts` `socials[]` still use `href: '#'` (Facebook, Instagram, TikTok, YouTube)
+- [ ] Before/after project images — `config.ts` `landing.projects[]` uses color/pattern placeholders; swap in real photos once available
+- [ ] Community events — `config.ts` `community.events[]` are plausible placeholders; replace with real sponsorships/events as they're confirmed
