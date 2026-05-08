@@ -7,7 +7,7 @@
  * All pages and components import from this file.
  */
 
-const R2 = 'https://pub-f2cd6c5142ad4f2aacad0d8e2f818744.r2.dev/all-thing/site-images'
+const R2 = 'https://social.cerul.org/all-thing/site-images'
 
 export const CONFIG = {
   // ─── BRAND ───
