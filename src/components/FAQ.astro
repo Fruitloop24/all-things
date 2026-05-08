@@ -1,7 +1,19 @@
 ---
 import { CONFIG } from '../config'
 
-const faqs = CONFIG.faqs
+interface Props {
+  faqs?: { q: string; a: string }[]
+  eyebrow?: string
+  headline?: string
+  subheadline?: string
+}
+
+const {
+  faqs = CONFIG.faqs,
+  eyebrow = 'FAQ',
+  headline = 'Questions We Hear a Lot',
+  subheadline,
+} = Astro.props
 
 const faqSchema = {
   '@context': 'https://schema.org',
@@ -20,12 +32,13 @@ const faqSchema = {
 <section class="py-16 md:py-24 bg-white">
   <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
     <div data-reveal class="text-center mb-10">
-      <p class="text-warm-500 text-sm font-semibold tracking-widest uppercase mb-3">FAQ</p>
+      <p class="text-warm-500 text-sm font-semibold tracking-widest uppercase mb-3">{eyebrow}</p>
       <h2 class="font-heading text-3xl md:text-4xl font-bold text-stone-900 mb-3">
-        Questions We Hear a Lot
+        {headline}
       </h2>
       <p class="text-stone-500">
-        Quick answers to the things folks ask us most. Don't see yours?
+        {subheadline ?? "Quick answers to the things folks ask us most. Don't see yours?"}
+        {' '}
         <a href={CONFIG.cta.call.href} class="text-warm-600 font-semibold no-underline hover:text-warm-700">
           Give us a call
         </a>.

@@ -58,11 +58,11 @@ export const CONFIG = {
   },
 
   // ─── CTA ───
-  booking: 'https://calendar.app.google/LjFfVnMG14BtDwGo9',
+  booking: 'https://calendar.app.google/jEpBKp2efYqVynnk6',
   cta: {
     primary: {
       text: 'Book a Free Estimate',
-      href: 'https://calendar.app.google/LjFfVnMG14BtDwGo9',
+      href: 'https://calendar.app.google/jEpBKp2efYqVynnk6',
     },
     secondary: {
       text: 'Try Our Floor Visualizer',
@@ -70,7 +70,7 @@ export const CONFIG = {
     },
     quote: {
       text: 'Book Your Free Quote',
-      href: 'https://calendar.app.google/LjFfVnMG14BtDwGo9',
+      href: 'https://calendar.app.google/jEpBKp2efYqVynnk6',
     },
     call: {
       text: 'Call (478) 231-7935',
@@ -82,7 +82,7 @@ export const CONFIG = {
     },
     mobileCta: {
       text: 'Book a Free Estimate',
-      href: 'https://calendar.app.google/LjFfVnMG14BtDwGo9',
+      href: 'https://calendar.app.google/jEpBKp2efYqVynnk6',
     },
   },
 
@@ -157,12 +157,37 @@ export const CONFIG = {
   ],
 
   // ─── SOCIAL LINKS ───
+  // Set href to a real URL to enable. Anything left as '#' is hidden everywhere.
+  // facebookGroup is the join-our-community link (separate from main page).
   socials: [
-    { name: 'Facebook', href: '#', icon: 'M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z' },
-    { name: 'Instagram', href: '#', icon: 'M16 4H8a4 4 0 00-4 4v8a4 4 0 004 4h8a4 4 0 004-4V8a4 4 0 00-4-4zm-4 11a3 3 0 110-6 3 3 0 010 6zm4.5-7.5a1 1 0 110-2 1 1 0 010 2z' },
-    { name: 'TikTok', href: '#', icon: 'M12 2a1 1 0 011 1v13a2 2 0 11-3.5-1.3V8h-3v7a5 5 0 109-3V5a5 5 0 004 2V4a1 1 0 01-1-1h-6.5z' },
-    { name: 'YouTube', href: '#', icon: 'M19.6 3.2H4.4A2.4 2.4 0 002 5.6v12.8a2.4 2.4 0 002.4 2.4h15.2a2.4 2.4 0 002.4-2.4V5.6a2.4 2.4 0 00-2.4-2.4zM10 15.5v-7l5.2 3.5L10 15.5z' },
+    {
+      name: 'Facebook',
+      handle: 'All Things Flooring & Tile',
+      href: 'https://www.facebook.com/profile.php?id=61556405672441',
+      brandColor: '#1877F2',
+      icon: 'M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z',
+    },
+    {
+      name: 'Instagram',
+      handle: '@all_things_flooring_tile',
+      href: 'https://www.instagram.com/all_things_flooring_tile/',
+      brandColor: '#E1306C',
+      icon: 'M16 4H8a4 4 0 00-4 4v8a4 4 0 004 4h8a4 4 0 004-4V8a4 4 0 00-4-4zm-4 11a3 3 0 110-6 3 3 0 010 6zm4.5-7.5a1 1 0 110-2 1 1 0 010 2z',
+    },
+    {
+      name: 'TikTok',
+      handle: '@all_things_flooring_tile',
+      href: 'https://www.tiktok.com/@all_things_flooring_tile',
+      brandColor: '#010101',
+      icon: 'M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005.8 20.1a6.34 6.34 0 0010.86-4.43V8.55a8.16 8.16 0 004.77 1.52V6.69h-1.84z',
+    },
   ],
+  facebookGroup: '#', // Join our community link — replace with real Facebook Group URL (different from main page)
+
+  // ─── GOOGLE MAP EMBED (showroom location) ───
+  // Free embed, no API key needed. Update if address changes.
+  mapEmbed: 'https://maps.google.com/maps?q=1245+College+St,+Eastman,+GA+31023&t=&z=15&ie=UTF8&iwloc=&output=embed',
+  mapDirections: 'https://www.google.com/maps/dir/?api=1&destination=1245+College+St,+Eastman,+GA+31023',
 
   // ─── SHOWROOM SECTION ───
   showroom: {
@@ -266,6 +291,34 @@ export const CONFIG = {
     {
       q: 'Do you rent tools for DIY projects?',
       a: "Yes — we rent professional flooring tools like tile saws, nailers, and rollers. Stop by the showroom and we're happy to give you DIY advice while you're picking up what you need.",
+    },
+  ],
+
+  // ─── STUDIO PAGE FAQ ───
+  studioFaqs: [
+    {
+      q: 'Is the AI Room Visualizer really free?',
+      a: "Yes — completely free, no signup, no email required. Upload a photo, pick a floor, and see your room transformed in about 15-30 seconds.",
+    },
+    {
+      q: 'How accurate is the AI render?',
+      a: "Very — but it's a visualization, not a final spec. The AI shows you what the floor type, color, and pattern will look like in your space. The real floors will match the look but exact wood grain, tile veining, and lighting will vary slightly.",
+    },
+    {
+      q: 'How accurate is the cost calculator?',
+      a: "Our calculator uses real local pricing for materials and labor in Middle Georgia. Most projects come in at or below the low end of the estimate. For a final, exact quote we'll come measure your space — book a free estimate and we'll lock it in.",
+    },
+    {
+      q: 'What kind of room photo gives the best result?',
+      a: "A well-lit photo taken from about head height showing as much floor space as possible. Avoid heavy shadows or cluttered floors. Phone cameras work great — no fancy gear needed.",
+    },
+    {
+      q: 'Can I save or share my visualizer result?',
+      a: "Yes — after generating, hit Save Image to download the result, or Share to send it to friends, your contractor, or post it. Share it on Facebook or Instagram and tag us!",
+    },
+    {
+      q: 'Do I have to buy from you to use this?',
+      a: "Nope — the tool is free for anyone. We built it because we want folks in Eastman and Dodge County to feel confident about their flooring decisions. That said, if you like what you see, give us a call — we'd love to install it for you.",
     },
   ],
 

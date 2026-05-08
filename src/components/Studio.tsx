@@ -47,6 +47,7 @@ function VisualizerTab() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [resultImage, setResultImage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [shareLabel, setShareLabel] = useState<'Share' | 'Shared!' | 'Link copied!'>('Share')
   const roomRef = useRef<HTMLInputElement>(null)
   const sampleRef = useRef<HTMLInputElement>(null)
 
@@ -104,6 +105,44 @@ function VisualizerTab() {
     setPrompt('')
     setResultImage(null)
     setError(null)
+    setShareLabel('Share')
+  }
+
+  const handleShare = async () => {
+    if (!resultImage) return
+    const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/studio` : '/studio'
+    const shareTitle = `My new floor — ${CONFIG.appName}`
+    const shareText = `Just visualized new floors in my room with the All Things Flooring AI tool. Try it free 👇`
+
+    try {
+      const blob = await (await fetch(resultImage)).blob()
+      const file = new File([blob], 'my-new-floor.jpg', { type: blob.type || 'image/jpeg' })
+      const navAny: any = navigator
+      const filePayload = { files: [file], title: shareTitle, text: shareText, url: shareUrl }
+      if (navAny.share && (!navAny.canShare || navAny.canShare(filePayload))) {
+        await navAny.share(filePayload)
+        setShareLabel('Shared!')
+        setTimeout(() => setShareLabel('Share'), 2000)
+        return
+      }
+      if (navAny.share) {
+        await navAny.share({ title: shareTitle, text: shareText, url: shareUrl })
+        setShareLabel('Shared!')
+        setTimeout(() => setShareLabel('Share'), 2000)
+        return
+      }
+    } catch (_) {
+      // user cancelled or share failed — fall through to clipboard
+    }
+
+    try {
+      await navigator.clipboard.writeText(shareUrl)
+      setShareLabel('Link copied!')
+      setTimeout(() => setShareLabel('Share'), 2000)
+    } catch (_) {
+      // clipboard blocked — surface as a soft error
+      setError("Couldn't share automatically — try Save Image and post it manually.")
+    }
   }
 
   if (resultImage) {
@@ -145,6 +184,16 @@ function VisualizerTab() {
               className="px-5 py-2.5 rounded-lg border border-warm-300 text-warm-700 text-xs font-semibold hover:bg-warm-50 transition-all cursor-pointer"
             >
               Save Image
+            </button>
+            <button
+              onClick={handleShare}
+              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg border border-warm-300 text-warm-700 text-xs font-semibold hover:bg-warm-50 transition-all cursor-pointer"
+              aria-label="Share your new floor"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+              </svg>
+              {shareLabel}
             </button>
           </div>
           <div className="flex items-center gap-2">

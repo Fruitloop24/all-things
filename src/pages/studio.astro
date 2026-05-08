@@ -1,6 +1,8 @@
 ---
 import Base from '../layouts/Base.astro'
 import Studio from '../components/Studio'
+import FAQ from '../components/FAQ.astro'
+import { CONFIG } from '../config'
 ---
 
 <Base title="Design Studio" description="Visualize new floors in your room with AI, or get an instant cost estimate with our calculator.">
@@ -16,4 +18,11 @@ import Studio from '../components/Studio'
     </div>
   </section>
   <Studio client:load />
+
+  <FAQ
+    faqs={CONFIG.studioFaqs}
+    eyebrow="Studio FAQ"
+    headline="About the Visualizer & Calculator"
+    subheadline="The most common questions about our AI tools. Don't see yours?"
+  />
 </Base>

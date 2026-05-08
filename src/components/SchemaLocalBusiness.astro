@@ -3,14 +3,42 @@ import { CONFIG } from '../config'
 
 const email = CONFIG.cta.email.href.replace(/^mailto:/, '')
 
+const cities = [
+  'Eastman',
+  'McRae-Helena',
+  'Cochran',
+  'Hawkinsville',
+  'Chauncey',
+  'Dublin',
+  'Rhine',
+  'Milan',
+  'Cadwell',
+  'Abbeville',
+]
+const counties = [
+  'Dodge County',
+  'Telfair County',
+  'Pulaski County',
+  'Laurens County',
+  'Wilcox County',
+  'Bleckley County',
+]
+
+const sameAs = CONFIG.socials
+  .filter((s) => s.href && s.href !== '#')
+  .map((s) => s.href)
+
 const schema = {
   '@context': 'https://schema.org',
   '@type': 'HomeAndConstructionBusiness',
+  '@id': new URL('/#business', Astro.site).toString(),
   name: CONFIG.appName,
   image: new URL('/pwa-512.png', Astro.site).toString(),
+  logo: CONFIG.images.logoTransparent,
   telephone: CONFIG.phone.display,
   email,
   url: Astro.site?.toString(),
+  ...(sameAs.length > 0 && { sameAs }),
   address: {
     '@type': 'PostalAddress',
     streetAddress: CONFIG.address.street,
@@ -25,12 +53,9 @@ const schema = {
     longitude: -83.1763,
   },
   areaServed: [
-    'Eastman',
-    'Dodge County',
-    'McRae-Helena',
-    'Cochran',
-    'Telfair County',
-  ].map((name) => ({ '@type': 'City', name })),
+    ...cities.map((name) => ({ '@type': 'City', name })),
+    ...counties.map((name) => ({ '@type': 'AdministrativeArea', name })),
+  ],
   openingHoursSpecification: [
     {
       '@type': 'OpeningHoursSpecification',
