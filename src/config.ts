@@ -58,11 +58,18 @@ export const CONFIG = {
   },
 
   // ─── CTA ───
-  booking: 'https://calendar.app.google/jEpBKp2efYqVynnk6',
+  booking: '/book',
+  bookingApi: {
+    base: 'https://hetzner.cerul.org',
+    sourceSite: 'allthingsflooringntile.com',
+    hoursLabel: 'Mon – Fri · 8 AM – 4 PM',
+    requestPath: '/public/book/request',
+    confirmPath: '/public/book/confirm',
+  },
   cta: {
     primary: {
       text: 'Book a Free Estimate',
-      href: 'https://calendar.app.google/jEpBKp2efYqVynnk6',
+      href: '/book',
     },
     secondary: {
       text: 'Try Our Floor Visualizer',
@@ -70,7 +77,7 @@ export const CONFIG = {
     },
     quote: {
       text: 'Book Your Free Quote',
-      href: 'https://calendar.app.google/jEpBKp2efYqVynnk6',
+      href: '/book',
     },
     call: {
       text: 'Call (478) 231-7935',
@@ -82,7 +89,7 @@ export const CONFIG = {
     },
     mobileCta: {
       text: 'Book a Free Estimate',
-      href: 'https://calendar.app.google/jEpBKp2efYqVynnk6',
+      href: '/book',
     },
   },
 
