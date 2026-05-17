@@ -27,6 +27,7 @@ src/
     SchemaLocalBusiness.astro    # JSON-LD — HomeAndConstructionBusiness
     Studio.tsx                   # Preact island — AI Visualizer + Cost Calculator
     SqFtChallenge.tsx            # Preact island — sq ft practice game on Resources page
+    BookingForm.tsx              # Preact island — /book intake form + slot picker (Cerul-backed)
   pages/
     index.astro                  # Landing: hero, studio cards, projects, testimonials, suppliers, QR, showroom
     studio.astro                 # Mounts <Studio client:load />
@@ -35,6 +36,7 @@ src/
     resources.astro              # Newsletter iframe, sq ft article, <SqFtChallenge client:visible />, YouTube
     partners.astro               # Materials + installation partnerships, supplier bar
     newsletter.astro             # Newsletter signup iframe
+    book.astro                   # Mounts <BookingForm client:load /> — replaces old Google Calendar link
   styles/
     global.css                   # Tailwind import + @theme CSS vars (warm/stone palette)
   assets/                        # Legacy local images (most site imagery lives on R2)
@@ -52,8 +54,8 @@ tsconfig.json                    # Strict, Preact JSX runtime, react/react-dom a
 
 - **Config-driven:** Everything flows from `src/config.ts` — business info, CTAs, nav, pricing, testimonials, suppliers, team, studio worker URL. Edit config, not components.
 - **Static output, no CF adapter:** `astro build` emits a plain `dist/` of HTML + assets. No `@astrojs/cloudflare` adapter — adding it splits output and breaks CF Pages routing.
-- **Interactivity via islands only:** The marketing site is static. Two Preact islands: `Studio.tsx` (`client:load` — AI visualizer + calculator) and `SqFtChallenge.tsx` (`client:visible` — sq ft game). Landing carousels and mobile menu use vanilla `<script>` blocks in Astro files.
-- **Booking CTA:** Primary CTAs point to Google Calendar booking (`CONFIG.booking`). Phone number is secondary. Header shows both.
+- **Interactivity via islands only:** The marketing site is static. Three Preact islands: `Studio.tsx` (`client:load` — AI visualizer + calculator), `SqFtChallenge.tsx` (`client:visible` — sq ft game), and `BookingForm.tsx` (`client:load` — booking intake + slot picker on `/book`). Landing carousels and mobile menu use vanilla `<script>` blocks in Astro files.
+- **Booking CTA:** Primary CTAs point to internal `/book` page (`CONFIG.booking`) — a Preact island wired to Cerul's stateless 2-endpoint backend at `hetzner.cerul.org`. Replaced the old Google Calendar deep link 2026-05-16. Full recipe + contract spec in `docs/adding-booking.md` (reusable template for porting the same flow to other contractor sites). Phone number is secondary; Header shows both.
 - **Worker AI pipeline:** Upload room + flooring images → R2 storage → Gemini analyzes both → Gemini edits room with new floor → saves to R2 → returns base64. Falls back to OpenAI if Gemini fails.
 - **Worker security:** Origin allowlist (`allthingsflooringntile.com`, `www.` variant, `*.all-things.pages.dev` previews, localhost dev ports) enforced on `/generate`. `/health` is open. Rate limited to 10 req / 60s / IP via Cloudflare's native `[[unsafe.bindings]] type = "ratelimit"` binding.
 

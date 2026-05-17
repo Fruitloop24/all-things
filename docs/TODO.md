@@ -1,10 +1,33 @@
 # All Things Flooring & Tile — TODO
 
-Last updated: 2026-05-08
+Last updated: 2026-05-16
 
 ## Overall status
 
 **Site is live, indexed, and structurally sound.** Google has all 7 pages indexed, Bing has the sitemap, structured data is rich, security headers are in place, all H1s present, alt text on every image. The fundamentals are done. What's left is local-SEO depth (town pages, Service schema), share polish (OG image), and one infrastructure fix (R2 custom domain).
+
+---
+
+## Booking flow — PICK UP HERE TOMORROW (2026-05-16 EOD state)
+
+**What shipped today (commits `4c52958` + `9be3a2b` on master, auto-deployed by CF Pages):**
+- `/book` page replaces the old Google Calendar deep link site-wide.
+- Astro shell (`src/pages/book.astro`) + Preact island (`src/components/BookingForm.tsx`) wired to Cerul's stateless 2-endpoint contract: `POST hetzner.cerul.org/public/book/{request,confirm}`.
+- All 8 booking CTAs flipped to internal `/book` (Header, index ×4, about, partners, resources). `target="_blank"` stripped — internal now.
+- `CONFIG.bookingApi` block in `src/config.ts` (base URL, source_site, paths, hoursLabel).
+- CSP `connect-src` extended to `hetzner.cerul.org` + Google Fonts (fixes a separate workbox-precache noise that was unrelated to booking).
+- `docs/adding-booking.md` — full playbook for porting this same flow to the next contractor site. Includes the contract, the file diffs, the tenant SQL pattern, and every gotcha hit across the four contract iterations. Read this first if doing anything booking-related.
+
+**Where we left off — what to test in the morning:**
+- [ ] **CORS still failing in production at last check.** Browser console showed `No 'Access-Control-Allow-Origin' header is present` on the OPTIONS preflight to `/public/book/request`. Cerul side hadn't fully deployed when we tested, so revisit first thing — likely just needs their server-side deploy to land.
+   - Quick verify command: `curl -i -X OPTIONS https://hetzner.cerul.org/public/book/request -H "Origin: https://allthingsflooringntile.com" -H "Access-Control-Request-Method: POST" -H "Access-Control-Request-Headers: Content-Type"` — should see `Access-Control-Allow-Origin: https://allthingsflooringntile.com` in the response.
+- [ ] **End-to-end smoke test on the live site** once CORS is green: open https://allthingsflooringntile.com/book , fill form, watch Network tab for `request` → slots → `confirm` → 201. Confirm the `📞 CALL` event shows up on Ron's/Jamie's dashboard when you reject 6 slots.
+- [ ] **Localhost dev option** if Cerul still isn't ready: `npm run dev` → http://localhost:4321/book . Cerul's allowlist already includes `localhost:4321` per the contract.
+
+**Notes that bit us today, don't re-litigate:**
+- Two endpoints only, not three — there's no separate `/callback`. Server creates the 📞 CALL event internally on the second rejection round (when `exclude_slot_ids.length >= 6`) and returns `handoff: true` in the same `/request` response. Don't reintroduce a client-side callback POST.
+- `slot_id` is a composite key (`crew_id::iso`), NOT the same as `starts_at`. Use `slot_id` on both `exclude_slot_ids` and `/confirm`. Server v4 contract was explicit about this.
+- No `lead_id` — frontend resends full customer info on `/confirm`. Pure-function backend, no DB row for incomplete leads. If the customer bails mid-form, nothing exists. That's intentional ("fuck it, can't do it all for them" — owner's words).
 
 ---
 
