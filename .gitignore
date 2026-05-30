@@ -34,5 +34,4 @@ worker/.wrangler
 .env.*
 
 # Sub-projects (separate repos)
-flooring-app/
 .playwright-mcp/
