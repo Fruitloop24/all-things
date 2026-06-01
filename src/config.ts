@@ -40,9 +40,9 @@ export const CONFIG = {
 
   // ─── CONTACT ───
   phone: {
-    raw: '4782317935',
-    display: '(478) 231-7935',
-    href: 'tel:4782317935',
+    raw: '4782986012',
+    display: '(478) 298-6012',
+    href: 'tel:4782986012',
   },
   address: {
     street: '1245 College St',
@@ -80,8 +80,8 @@ export const CONFIG = {
       href: '/book',
     },
     call: {
-      text: 'Call (478) 231-7935',
-      href: 'tel:4782317935',
+      text: 'Call (478) 298-6012',
+      href: 'tel:4782986012',
     },
     email: {
       text: 'Email Us',
@@ -107,7 +107,7 @@ export const CONFIG = {
     { to: '/', label: 'Home', icon: 'home' },
     { to: '/studio', label: 'Studio', icon: 'studio' },
     { to: '/community', label: 'Community', icon: 'community' },
-    { to: 'tel:4782317935', label: 'Call', icon: 'phone', external: true },
+    { to: 'tel:4782986012', label: 'Call', icon: 'phone', external: true },
   ],
 
   // ─── HERO ───
@@ -273,7 +273,7 @@ export const CONFIG = {
     },
     {
       q: 'What areas do you serve?',
-      a: 'We serve Eastman, Dodge County, McRae-Helena, Cochran, Telfair County, and surrounding Middle Georgia communities. Not sure whether we cover your area? Just call us at (478) 231-7935.',
+      a: 'We serve Eastman, Dodge County, McRae-Helena, Cochran, Telfair County, and surrounding Middle Georgia communities. Not sure whether we cover your area? Just call us at (478) 298-6012.',
     },
     {
       q: 'What types of flooring do you install?',
