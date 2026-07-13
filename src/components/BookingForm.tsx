@@ -1,7 +1,7 @@
 import { useState } from 'preact/hooks'
 import { CONFIG } from '../config'
 
-type Step = 'info' | 'slots' | 'confirmed' | 'handoff'
+type Step = 'info' | 'slots' | 'confirmed' | 'handoff' | 'requested'
 type PreferredWindow = 'morning' | 'afternoon' | 'anytime'
 
 interface CustomerInfo {
@@ -67,6 +67,7 @@ export default function BookingForm() {
   const [excludeIds, setExcludeIds] = useState<string[]>([])
   const [confirmationMessage, setConfirmationMessage] = useState('')
   const [handoffMessage, setHandoffMessage] = useState('')
+  const [requestedMessage, setRequestedMessage] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [conflictNotice, setConflictNotice] = useState('')
@@ -100,6 +101,9 @@ export default function BookingForm() {
       slots?: Slot[]
       handoff?: boolean
       handoff_message?: string
+      // request-mode crews: no live slots — we call the customer back
+      request_received?: boolean
+      message?: string
     }>
   }
 
@@ -116,6 +120,11 @@ export default function BookingForm() {
     setExcludeIds([])
     try {
       const data = await requestSlots([])
+      if (data.request_received) {
+        setRequestedMessage(data.message || "Thanks! We got your request — we'll contact you within 24 hours to lock in a time.")
+        setStep('requested')
+        return
+      }
       if (data.handoff) {
         handleHandoff(data.handoff_message)
         return
@@ -214,6 +223,31 @@ export default function BookingForm() {
   }
 
   // ─── Handoff (server bailed us to "someone will call you") ─────────────
+  // ─── Request-mode thank-you: no slots, we call THEM ─────────────────────
+  if (step === 'requested') {
+    return (
+      <div class="bg-white rounded-2xl border border-warm-100 p-8 md:p-10 shadow-sm text-center">
+        <div class="w-14 h-14 bg-warm-100 rounded-full flex items-center justify-center mx-auto mb-5">
+          <svg class="w-7 h-7 text-warm-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+          </svg>
+        </div>
+        <h2 class="font-heading text-2xl md:text-3xl font-bold text-stone-900 mb-2">
+          Request received, {info.name.split(' ')[0]}!
+        </h2>
+        <p class="text-stone-600 mb-6">{requestedMessage}</p>
+        <p class="text-stone-500 text-sm mb-6">
+          Need us sooner?{' '}
+          <a href={CONFIG.phone.href} class="text-warm-700 hover:text-warm-800 font-semibold no-underline">Call</a>
+          {' '}or{' '}
+          <a href={`sms:${CONFIG.phone.raw}`} class="text-warm-700 hover:text-warm-800 font-semibold no-underline">text</a>
+          {' '}{CONFIG.phone.display}.
+        </p>
+        <a href="/" class="inline-block text-warm-700 hover:text-warm-800 font-semibold text-sm no-underline">← Back to home</a>
+      </div>
+    )
+  }
+
   if (step === 'handoff') {
     return (
       <div class="bg-white rounded-2xl border border-warm-100 p-8 md:p-10 shadow-sm text-center">
@@ -309,7 +343,7 @@ export default function BookingForm() {
       class="bg-white rounded-2xl border border-warm-100 p-6 md:p-8 shadow-sm space-y-5"
     >
       <div class="mb-1">
-        <p class="text-warm-700 text-xs font-semibold tracking-widest uppercase mb-1">Step 1 of 2</p>
+        <p class="text-warm-700 text-xs font-semibold tracking-widest uppercase mb-1">Free estimate request</p>
         <h2 class="font-heading text-xl md:text-2xl font-bold text-stone-900">Tell us about your project</h2>
       </div>
 
@@ -407,7 +441,7 @@ export default function BookingForm() {
           </>
         ) : (
           <>
-            Find available times <span aria-hidden="true">→</span>
+            Request my estimate <span aria-hidden="true">→</span>
           </>
         )}
       </button>
