@@ -49,6 +49,7 @@ function VisualizerTab() {
   const [error, setError] = useState<string | null>(null)
   const [shareLabel, setShareLabel] = useState<'Share' | 'Shared!' | 'Link copied!'>('Share')
   const roomRef = useRef<HTMLInputElement>(null)
+  const roomCamRef = useRef<HTMLInputElement>(null)
   const sampleRef = useRef<HTMLInputElement>(null)
 
   const handleRoomFile = (file: File | null | undefined) => {
@@ -248,8 +249,7 @@ function VisualizerTab() {
           <div className="flex-1 min-w-0">
             {!roomImage ? (
               <div
-                className="h-[360px] flex flex-col items-center justify-center cursor-pointer hover:bg-warm-50/30 transition-all border-r border-warm-100"
-                onClick={() => roomRef.current?.click()}
+                className="h-[360px] flex flex-col items-center justify-center transition-all border-r border-warm-100 px-4"
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={(e) => {
                   e.preventDefault()
@@ -260,10 +260,29 @@ function VisualizerTab() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
                 </svg>
-                <p className="text-stone-700 font-semibold text-sm">Upload your room photo</p>
-                <p className="text-stone-400 text-xs mt-1">Well-lit with visible floor space works best</p>
+                <p className="text-stone-700 font-semibold text-sm">Add your room photo</p>
+                <p className="text-stone-400 text-xs mt-1 text-center">Well-lit with visible floor space works best</p>
+                <div className="flex gap-2 mt-4">
+                  <button
+                    type="button"
+                    onClick={() => roomRef.current?.click()}
+                    className="rounded-lg bg-accent text-white text-sm font-semibold px-4 py-2.5 hover:bg-accent-dark transition-all cursor-pointer"
+                  >Upload a pic</button>
+                  <button
+                    type="button"
+                    onClick={() => roomCamRef.current?.click()}
+                    className="rounded-lg border border-stone-200 text-stone-600 text-sm font-semibold px-4 py-2.5 hover:bg-stone-50 transition-all cursor-pointer"
+                  >Take a pic</button>
+                </div>
                 <input
                   ref={roomRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => handleRoomFile((e.currentTarget as HTMLInputElement).files?.[0])}
+                />
+                <input
+                  ref={roomCamRef}
                   type="file"
                   accept="image/*"
                   capture="environment"
