@@ -77,7 +77,7 @@ const ogImage = image ?? new URL('/pwa-512.png', Astro.site).toString()
   </head>
   <body class="bg-warm-50 text-stone-800 antialiased min-h-screen flex flex-col">
     <Header />
-    <main class="flex-1 pt-20 pb-24 md:pb-0">
+    <main class:list={['flex-1 pb-24 md:pb-0', CONFIG.hiring.active ? 'pt-30' : 'pt-20']}>
       <slot />
     </main>
     <Footer />

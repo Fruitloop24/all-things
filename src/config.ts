@@ -93,6 +93,18 @@ export const CONFIG = {
     },
   },
 
+  // ─── HIRING FLASH (set active: false to take the banner down) ───
+  hiring: {
+    active: true,
+    label: 'NOW HIRING',
+    text: 'Experienced floor installer',
+    cta: 'Call or text Ron',
+    phone: {
+      display: '(478) 231-7935',
+      href: 'tel:4782317935',
+    },
+  },
+
   // ─── NAVIGATION ───
   nav: [
     { to: '/', label: 'Home' },
