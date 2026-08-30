@@ -113,7 +113,7 @@ Base: `https://hetzner.cerul.org`. Two endpoints, stateless, no `lead_id`.
 {
   "slots": [
     {
-      "slot_id":       "web-ron-whittington::2026-06-03T13:00:00Z",
+      "slot_id":       "web-all-things-flooring-and-tile::2026-06-03T13:00:00Z",
       "starts_at":     "2026-06-03T13:00:00Z",
       "ends_at":       "2026-06-03T14:00:00Z",
       "worker_name":   "Ron",
@@ -139,7 +139,7 @@ Server has already created the 📞 CALL event + pushed the contractor. Frontend
 {
   "source_site": "...",
   "name": "Jane Doe", "phone": "...", "email": "...", "address": "...", "message": "",
-  "slot_id": "web-ron-whittington::2026-06-03T13:00:00Z",
+  "slot_id": "web-all-things-flooring-and-tile::2026-06-03T13:00:00Z",
   "title": "LVP estimate",       // optional, server defaults
   "duration_minutes": 60         // optional
 }

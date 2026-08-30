@@ -212,7 +212,7 @@ export const CONFIG = {
   showroom: {
     headline: 'Visit Our Showroom in Eastman',
     subheadline: 'See and feel hundreds of flooring samples in person. Our team is ready to help you pick the perfect floor and provide a free, no-obligation estimate.',
-    aiBadge: 'Invoice Ninja AI — Get an instant estimate 24/7 from our website',
+    aiBadge: 'Get an instant estimate 24/7 from our website',
   },
 
   // ─── TEAM ───
