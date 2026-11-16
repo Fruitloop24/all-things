@@ -1,151 +1,84 @@
 import { useState } from 'preact/hooks'
 import { CONFIG } from '../../config'
 import type { CabinetPricing, PriceRange } from '../../config'
-import { BallparkBox, Chips, PlannerCard, PriceTable, fieldLabel, inputClass, labelOf, rangeText, roundTo, sendToBook, summaryText } from './kit'
+import { Chips, PlannerCard, Slider, fieldLabel, labelOf, rangeText, roundTo, sendToBook, summaryText } from './kit'
 
 const P = CONFIG.cabinets.planner
 const PRICING: CabinetPricing | null = CONFIG.cabinets.pricing
 const round100 = (n: number) => roundTo(n, 100)
 
-/** Per-foot cabinet range for a grade; no grade or "not sure" = lowest low to highest high. */
-function gradeRange(pricing: CabinetPricing, grade: string): PriceRange {
-  const g = pricing.grades.find((x) => x.key === grade)
-  if (g) return g.perLinearFoot
-  return {
-    low: Math.min(...pricing.grades.map((x) => x.perLinearFoot.low)),
-    high: Math.max(...pricing.grades.map((x) => x.perLinearFoot.high)),
-  }
-}
-
-export interface Ballpark {
-  cabinets: PriceRange
-  countertop: PriceRange | null
-  countertopSqFt: number
-  total: PriceRange
-}
-
-/** Ballpark, rounded to the nearest $100. Null without pricing or a wall length. */
-export function ballpark(pricing: CabinetPricing | null, feet: number, grade: string, countertop: string): Ballpark | null {
-  if (!pricing || !(feet > 0)) return null
-  const per = gradeRange(pricing, grade)
-  const cab = { low: feet * per.low, high: feet * per.high }
+/** Ballpark total, rounded to the nearest $100. Null without pricing, a wall length or a grade. */
+export function ballpark(pricing: CabinetPricing | null, feet: number, grade: string, countertop: string): PriceRange | null {
+  const per = pricing?.grades.find((g) => g.key === grade)?.perLinearFoot
+  if (!pricing || !per || !(feet > 0)) return null
   const top = (pricing.countertopPerSqFt as Record<string, PriceRange | undefined>)[countertop]
   const sqft = feet * pricing.countertopSqFtPerLinearFoot
-  const ct = top ? { low: sqft * top.low, high: sqft * top.high } : null
   return {
-    cabinets: { low: round100(cab.low), high: round100(cab.high) },
-    countertop: ct ? { low: round100(ct.low), high: round100(ct.high) } : null,
-    countertopSqFt: sqft,
-    total: { low: round100(cab.low + (ct?.low ?? 0)), high: round100(cab.high + (ct?.high ?? 0)) },
+    low: round100(feet * per.low + (top ? sqft * top.low : 0)),
+    high: round100(feet * per.high + (top ? sqft * top.high : 0)),
   }
 }
 
 export default function CabinetPlanner() {
-  const [room, setRoom] = useState('')
-  const [feet, setFeet] = useState('')
-  const [grade, setGrade] = useState('')
-  const [look, setLook] = useState('')
-  const [countertop, setCountertop] = useState('')
-  const [timing, setTiming] = useState('')
+  const [room, setRoom] = useState(P.defaults.room)
+  const [feet, setFeet] = useState(P.defaults.feet)
+  const [grade, setGrade] = useState(P.defaults.grade)
+  const [countertop, setCountertop] = useState(P.defaults.countertop)
 
-  const ft = Number(feet)
-  const bp = ballpark(PRICING, ft, grade, countertop)
-  const rows: [string, string][] = [
-    ['Room', labelOf(P.rooms, room)],
-    ['Wall length', ft > 0 ? `about ${ft} ft` : ''],
-    ['Cabinet grade', labelOf(P.grades, grade)],
-    ['Look', labelOf(P.looks, look)],
-    ['Countertop', labelOf(P.countertops, countertop)],
-    ['Timing', labelOf(P.timings, timing)],
-  ]
+  // Chips can be tapped off; fall back to the default so there is always a number.
+  const g = grade || P.defaults.grade
+  const c = countertop || P.defaults.countertop
+  const bp = ballpark(PRICING, feet, g, c)
+  const hasTop = c !== 'none'
+  const line = `${feet} feet of ${labelOf(P.grades, g).toLowerCase()} cabinets${hasTop ? ` with a ${labelOf(P.countertops, c).toLowerCase()} countertop` : ''}, installed.`
 
   function send() {
-    const sendRows: [string, string][] = bp ? [...rows, ['Ballpark', `${rangeText(bp.total)} (ballpark only)`]] : rows
-    sendToBook(summaryText('Cabinet Planner', sendRows))
+    const rows: [string, string][] = [
+      ['Room', labelOf(P.rooms, room)],
+      ['Wall length', `about ${feet} ft`],
+      ['Cabinets', labelOf(P.grades, g)],
+      ['Countertop', labelOf(P.countertops, c)],
+      ['Ballpark', bp ? `${rangeText(bp)} (ballpark only)` : ''],
+    ]
+    sendToBook(summaryText('Cabinet Planner', rows))
   }
-
-  const extra = bp && (
-    <BallparkBox
-      lines={[
-        ['Cabinets', rangeText(bp.cabinets)],
-        ...(bp.countertop ? ([[`Countertop (about ${bp.countertopSqFt} sq ft)`, rangeText(bp.countertop)]] as [string, string][]) : []),
-      ]}
-      total={bp.total}
-    />
-  )
-
-  const topNote = PRICING
-    ? 'Countertops add ' +
-      P.countertops
-        .map((c) => {
-          const r = (PRICING.countertopPerSqFt as Record<string, PriceRange | undefined>)[c.key]
-          return r ? `${c.label.toLowerCase()} ${rangeText(r)}` : ''
-        })
-        .filter(Boolean)
-        .join(', ') +
-      ' per sq ft.'
-    : undefined
 
   return (
     <PlannerCard
       eyebrow={P.eyebrow}
       headline={P.headline}
       subheadline={P.subheadline}
-      rows={rows}
-      extra={extra}
+      total={bp}
+      line={line}
+      text="Tell us about it and we will put a number on it."
       disclaimer={PRICING?.disclaimer}
       onSend={send}
     >
-      {PRICING && (
-        <PriceTable
-          title="General numbers, installed, per foot of wall"
-          rows={PRICING.grades.map((g) => [g.label, `${rangeText(g.perLinearFoot)} per ft`] as [string, string])}
-          note={topNote}
-        />
-      )}
-
       <div>
         <span class={fieldLabel}>Which room?</span>
         <Chips name="Room" options={P.rooms} value={room} onChange={setRoom} />
       </div>
 
+      <Slider
+        id="planner-feet"
+        label="How much wall gets cabinets?"
+        value={feet}
+        min={4}
+        max={40}
+        step={1}
+        unit="feet"
+        hint={P.feetHint}
+        onChange={setFeet}
+      />
+
       <div>
-        <label for="planner-feet" class={fieldLabel}>
-          Rough wall length <span class="text-stone-400 font-normal">(feet)</span>
-        </label>
-        <input
-          id="planner-feet"
-          type="number"
-          inputMode="numeric"
-          min={1}
-          max={200}
-          step={1}
-          value={feet}
-          onInput={(e) => setFeet((e.target as HTMLInputElement).value)}
-          placeholder="14"
-          class={`w-32 ${inputClass}`}
-        />
-        <p class="text-xs text-stone-500 mt-1">Add up the walls that get cabinets. A guess is fine.</p>
+        <span class={fieldLabel}>What kind of cabinets?</span>
+        <Chips name="Cabinets" options={P.grades} value={g} onChange={setGrade} />
       </div>
 
       <div>
-        <span class={fieldLabel}>Cabinet grade</span>
-        <Chips name="Cabinet grade" options={P.grades} value={grade} onChange={setGrade} />
-      </div>
-
-      <div>
-        <span class={fieldLabel}>Look</span>
-        <Chips name="Look" options={P.looks} value={look} onChange={setLook} />
-      </div>
-
-      <div>
-        <span class={fieldLabel}>Countertop</span>
-        <Chips name="Countertop" options={P.countertops} value={countertop} onChange={setCountertop} />
-      </div>
-
-      <div>
-        <span class={fieldLabel}>Timing</span>
-        <Chips name="Timing" options={P.timings} value={timing} onChange={setTiming} />
+        <span class={fieldLabel}>New countertop?</span>
+        <Chips name="Countertop" options={P.countertops} value={c} onChange={setCountertop} />
       </div>
     </PlannerCard>
   )

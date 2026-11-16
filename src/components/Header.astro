@@ -10,7 +10,8 @@ const navItems = CONFIG.nav
 
 <header class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-warm-200 shadow-sm">
   {
-    CONFIG.hiring.active && (
+    /* Top strip on every page: the business line, or the hiring flash while CONFIG.hiring.active. */
+    CONFIG.hiring.active ? (
       <a href={CONFIG.hiring.phone.href} class="block bg-warm-800 text-warm-50 no-underline hover:bg-warm-900 transition-colors">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-10 flex items-center justify-center gap-2 sm:gap-3 text-xs sm:text-sm whitespace-nowrap overflow-hidden">
           <span class="animate-pulse bg-warm-300 text-warm-900 font-bold text-[10px] sm:text-[11px] tracking-widest px-2 py-0.5 rounded shrink-0">
@@ -19,6 +20,17 @@ const navItems = CONFIG.nav
           <span class="hidden sm:inline font-medium">{CONFIG.hiring.text}.</span>
           <span class="font-semibold">
             {CONFIG.hiring.cta}: <span class="underline underline-offset-2">{CONFIG.hiring.phone.display}</span>
+          </span>
+        </div>
+      </a>
+    
+    ) : (
+      <a href={CONFIG.phone.href} class="block bg-warm-800 text-warm-50 no-underline hover:bg-warm-900 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-10 flex items-center justify-center gap-2 sm:gap-3 text-xs sm:text-sm whitespace-nowrap overflow-hidden">
+          <span class="hidden sm:inline text-warm-200"><span class="text-yellow-400" aria-hidden="true">★★★★★</span> {CONFIG.reviewsSummary}</span>
+          <span class="hidden sm:inline text-warm-400" aria-hidden="true">·</span>
+          <span class="font-semibold">
+            Call for a free estimate: <span class="underline underline-offset-2">{CONFIG.phone.display}</span>
           </span>
         </div>
       </a>

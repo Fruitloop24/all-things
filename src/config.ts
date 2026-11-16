@@ -45,8 +45,8 @@ export interface RangeItem {
   label: string
   unit: 'sqft' | 'lf' | 'flat' | 'none'
   range?: PriceRange
-  /** Suffix for flat ranges in the table, e.g. "per bath". */
-  per?: string
+  /** Slider for sqft / lf items: where it starts and how far it goes. */
+  size?: { start: number; min: number; max: number; step: number }
 }
 export interface RangePricing {
   items: RangeItem[]
@@ -55,29 +55,18 @@ export interface RangePricing {
   disclaimer: string
 }
 
-/** A simple "tell us about it" planner: chips + short text fields, summary goes to /book. No prices. */
-export interface PlannerField {
-  key: string
-  label: string
-  /** Label used in the summary sent to /book (defaults to label). */
-  short?: string
-  type: 'chips' | 'text' | 'number'
-  options?: { key: string; label: string }[]
-  placeholder?: string
-  hint?: string
-}
+/** Build / Custom planner: pick an item, set a rough size if it is priced by size, see a ballpark. */
 export interface SimplePlannerConfig {
   eyebrow: string
   headline: string
   subheadline: string
   summaryTitle: string
-  fields: PlannerField[]
-  /** Chips field whose option keys match pricing.items keys, and the number field used as the size. */
-  priceField?: string
-  sizeField?: string
-  /** Size field label by unit. Hidden for flat / none items. */
-  sizeLabels?: { sqft: string; lf: string }
-  pricing?: RangePricing | null
+  /** Question above the item chips, and its label in the summary sent to /book. */
+  itemLabel: string
+  itemShort: string
+  /** Item selected on load, so a number shows right away. */
+  defaultItem: string
+  pricing: RangePricing
 }
 
 const photo = (name: string, alt: string, w: number, h: number): Photo => ({ src: `${WORK}/${name}.webp`, alt, w, h })
@@ -199,7 +188,7 @@ export const CONFIG = {
 
   // ─── HIRING FLASH (set active: false to take the banner down) ───
   hiring: {
-    active: true,
+    active: false,
     label: 'NOW HIRING',
     text: 'Experienced floor installer',
     cta: 'Call or text Ron',
@@ -254,7 +243,7 @@ export const CONFIG = {
   },
 
   // ─── REVIEWS (real Google reviews, verbatim. Do not edit the text.) ───
-  reviewsSummary: '4.7 on Google',
+  reviewsSummary: '13 five-star reviews on Google',
   testimonials: [
     { name: 'Scott Spitler', source: 'Google review', rating: 5, project: 'Remodels, countertops and tile', text: 'Can’t say enough good things about Ron and his crew. They show up for work when they say they are going to and do an excellent job. We’ve had them work on everything from bathroom, remodels,roofing, countertops, plumbing, painting and lots of tile work. We have been very pleased with everything.' },
     { name: 'Kimberly Peacock', source: 'Google review', rating: 5, project: 'Tile, countertops, stairs and closets', text: 'My tile, backsplash, and counter tops turned out better than I hoped! My staircase is beautiful! They did an amazing job! Love my floors! I get the most compliments on my master closet! Super friendly and helpful!' },
@@ -282,12 +271,13 @@ export const CONFIG = {
     planner: {
       eyebrow: 'Cabinet Planner',
       headline: 'Plan your cabinets',
-      subheadline: 'Pick what fits. Rough is fine. Add a wall length for a ballpark, and we will go over the details when we come out to measure.',
+      subheadline: 'Slide it to fit your room and see a ballpark. Then send it over or call.',
+      feetHint: 'A small kitchen is about 10 feet. A big one is closer to 25.',
+      defaults: { room: 'kitchen', feet: 12, grade: 'semi', countertop: 'none' },
       grades: [
         { key: 'stock', label: 'Ready-made' },
         { key: 'semi', label: 'Semi-custom' },
         { key: 'custom', label: 'Custom built' },
-        { key: 'unsure', label: 'Not sure' },
       ],
       rooms: [
         { key: 'kitchen', label: 'Kitchen' },
@@ -298,28 +288,17 @@ export const CONFIG = {
         { key: 'builtin', label: 'Built-in' },
         { key: 'other', label: 'Other' },
       ],
-      looks: [
-        { key: 'white-shaker', label: 'White shaker' },
-        { key: 'painted', label: 'Painted color' },
-        { key: 'stained', label: 'Stained wood' },
-        { key: 'unsure', label: 'Not sure' },
-      ],
       countertops: [
+        { key: 'none', label: 'No' },
+        { key: 'laminate', label: 'Laminate' },
         { key: 'butcher', label: 'Butcher block' },
         { key: 'stone', label: 'Stone or quartz' },
-        { key: 'laminate', label: 'Laminate' },
-        { key: 'unsure', label: 'Not sure / keeping mine' },
-      ],
-      timings: [
-        { key: 'asap', label: 'ASAP' },
-        { key: '1-3', label: '1 to 3 months' },
-        { key: 'planning', label: 'Just planning' },
       ],
     },
     faqs: [
       {
         q: 'How much do new cabinets cost?',
-        a: 'Ballpark, installed, per foot of wall: ready-made cabinets about $150 to $300, semi-custom about $250 to $650, and custom built about $500 to $1,200. Countertops add about $25 to $50 per square foot for laminate, $40 to $100 for butcher block, and $60 to $150 for stone or quartz.',
+        a: 'Most kitchens we do land between $4,000 and $9,000 for the cabinets, installed. Ballpark per foot of wall: ready-made about $175 to $250, semi-custom about $300 to $425, and custom built about $600 to $850. Use the planner above for a number on your room.',
       },
       {
         q: 'What rooms do you do cabinets for?',
@@ -338,17 +317,17 @@ export const CONFIG = {
     // Set to null to hide every dollar figure in the planner.
     pricing: {
       grades: [
-        { key: 'stock', label: 'Ready-made / stock', perLinearFoot: { low: 150, high: 300 } },
-        { key: 'semi', label: 'Semi-custom', perLinearFoot: { low: 250, high: 650 } },
-        { key: 'custom', label: 'Custom built', perLinearFoot: { low: 500, high: 1200 } },
+        { key: 'stock', label: 'Ready-made / stock', perLinearFoot: { low: 175, high: 250 } },
+        { key: 'semi', label: 'Semi-custom', perLinearFoot: { low: 300, high: 425 } },
+        { key: 'custom', label: 'Custom built', perLinearFoot: { low: 600, high: 850 } },
       ],
       countertopPerSqFt: {
-        laminate: { low: 25, high: 50 },
-        butcher: { low: 40, high: 100 },
-        stone: { low: 60, high: 150 },
+        laminate: { low: 30, high: 45 },
+        butcher: { low: 50, high: 75 },
+        stone: { low: 75, high: 110 },
       },
       countertopSqFtPerLinearFoot: 2,
-      disclaimer: 'Ballpark from typical installed prices, not a quote.',
+      disclaimer: 'A ballpark, not a quote. The free estimate gets you the real number.',
     } as CabinetPricing | null,
   },
 
@@ -363,43 +342,24 @@ export const CONFIG = {
     planner: {
       eyebrow: 'Custom Planner',
       headline: 'Tell us what you want built',
-      subheadline: 'Pick the piece for a ballpark, then send it over.',
+      subheadline: 'Pick the piece and see a ballpark. Then send it over or call.',
       summaryTitle: 'Custom piece',
-      priceField: 'what',
-      sizeField: 'size',
-      sizeLabels: { sqft: 'Rough square feet of top', lf: 'Rough length in feet' },
-      fields: [
-        { key: 'what', label: 'What is it?', short: 'Piece', type: 'chips', options: [
-          { key: 'barrel', label: 'Barrel table' },
-          { key: 'epoxy', label: 'Epoxy or live-edge table' },
-          { key: 'bar', label: 'Bar' },
-          { key: 'builtin', label: 'Built-ins' },
-          { key: 'shelving', label: 'Shelving' },
-          { key: 'countertop', label: 'Countertop' },
-          { key: 'other', label: 'Other' },
-        ] },
-        { key: 'size', label: 'Rough size', short: 'Size', type: 'number', placeholder: '10', hint: 'A guess is fine.' },
-        { key: 'finish', label: 'Wood or finish, if you know', short: 'Wood / finish', type: 'text', placeholder: 'Oak with an epoxy top' },
-        { key: 'timing', label: 'Timing', type: 'chips', options: [
-          { key: 'asap', label: 'ASAP' },
-          { key: '1-3', label: '1 to 3 months' },
-          { key: 'planning', label: 'Just planning' },
-        ] },
-      ],
+      itemLabel: 'What do you want built?',
+      itemShort: 'Piece',
+      defaultItem: 'barrel',
       // GENERAL typical ranges, NOT Ron's own price list. Replace with Ron's numbers when he sends them.
-      // Countertop reuses the cabinet countertop per-sq-ft spread (laminate low to stone high).
       pricing: {
         items: [
-          { key: 'barrel', label: 'Barrel table', unit: 'flat', range: { low: 800, high: 2500 } },
-          { key: 'epoxy', label: 'Epoxy or live-edge table', unit: 'flat', range: { low: 1500, high: 6000 } },
-          { key: 'bar', label: 'Bar', unit: 'flat', range: { low: 2000, high: 10000 } },
-          { key: 'builtin', label: 'Built-ins', unit: 'lf', range: { low: 300, high: 1200 } },
-          { key: 'shelving', label: 'Shelving', unit: 'lf', range: { low: 50, high: 200 } },
-          { key: 'countertop', label: 'Countertop', unit: 'sqft', range: { low: 25, high: 150 } },
+          { key: 'barrel', label: 'Barrel table', unit: 'flat', range: { low: 1200, high: 1800 } },
+          { key: 'epoxy', label: 'Epoxy or live-edge table', unit: 'flat', range: { low: 2500, high: 4000 } },
+          { key: 'bar', label: 'Bar', unit: 'flat', range: { low: 3500, high: 6000 } },
+          { key: 'builtin', label: 'Built-ins', unit: 'lf', range: { low: 450, high: 700 }, size: { start: 8, min: 3, max: 30, step: 1 } },
+          { key: 'shelving', label: 'Shelving', unit: 'lf', range: { low: 80, high: 130 }, size: { start: 8, min: 3, max: 40, step: 1 } },
+          { key: 'countertop', label: 'Countertop', unit: 'sqft', range: { low: 50, high: 85 }, size: { start: 30, min: 10, max: 100, step: 5 } },
           { key: 'other', label: 'Something else', unit: 'none' },
         ],
         roundTo: 100,
-        disclaimer: 'Ballpark from typical prices, not a quote.',
+        disclaimer: 'A ballpark, not a quote. The free estimate gets you the real number.',
       },
     } satisfies SimplePlannerConfig,
     faqs: [
@@ -409,11 +369,11 @@ export const CONFIG = {
       },
       {
         q: 'How much does a custom table cost?',
-        a: 'Ballpark: a barrel table runs about $800 to $2,500, and an epoxy or live-edge table about $1,500 to $6,000, depending on size, wood and finish.',
+        a: 'Ballpark: a barrel table runs about $1,200 to $1,800, and an epoxy or live-edge table about $2,500 to $4,000, depending on size, wood and finish.',
       },
       {
         q: 'How much do built-ins, shelving or a bar cost?',
-        a: 'Ballpark: built-ins run about $300 to $1,200 per linear foot, shelving about $50 to $200 per linear foot, and a bar about $2,000 to $10,000.',
+        a: 'Ballpark: built-ins run about $450 to $700 per foot, shelving about $80 to $130 per foot, and a bar about $3,500 to $6,000.',
       },
       {
         q: 'What areas do you serve?',
@@ -447,49 +407,25 @@ export const CONFIG = {
     planner: {
       eyebrow: 'Build Planner',
       headline: 'Tell us what you are planning',
-      subheadline: 'Pick the job for a ballpark, then send it over.',
+      subheadline: 'Pick the job and see a ballpark. Then send it over or call.',
       summaryTitle: 'Build or remodel',
-      priceField: 'project',
-      sizeField: 'sqft',
-      sizeLabels: { sqft: 'Rough square feet', lf: 'Rough length in feet' },
-      fields: [
-        { key: 'project', label: 'What are you planning?', short: 'Project', type: 'chips', options: [
-          { key: 'house', label: 'New house' },
-          { key: 'barndo', label: 'Barndominium kit' },
-          { key: 'addition', label: 'Addition' },
-          { key: 'porch', label: 'Covered porch' },
-          { key: 'bath', label: 'Bathroom remodel' },
-          { key: 'kitchen', label: 'Kitchen remodel' },
-          { key: 'stairs', label: 'Stairs' },
-          { key: 'remodel', label: 'Other remodel' },
-        ] },
-        { key: 'sqft', label: 'Rough square feet', short: 'Size', type: 'number', placeholder: '1800', hint: 'A guess is fine.' },
-        { key: 'land', label: 'Do you have land or plans yet?', short: 'Land / plans', type: 'chips', options: [
-          { key: 'both', label: 'Land and plans' },
-          { key: 'land', label: 'Land, no plans' },
-          { key: 'neither', label: 'Not yet' },
-          { key: 'na', label: 'Remodel, not needed' },
-        ] },
-        { key: 'timing', label: 'Timing', type: 'chips', options: [
-          { key: 'asap', label: 'ASAP' },
-          { key: '3-6', label: '3 to 6 months' },
-          { key: 'planning', label: 'Just planning' },
-        ] },
-      ],
+      itemLabel: 'What are you planning?',
+      itemShort: 'Project',
+      defaultItem: 'house',
       // GENERAL typical ranges (per sq ft finished unless flat), NOT Ron's own price list. Replace with Ron's numbers.
       pricing: {
         items: [
-          { key: 'house', label: 'New house', unit: 'sqft', range: { low: 150, high: 250 } },
-          { key: 'barndo', label: 'Barndominium kit, built out', unit: 'sqft', range: { low: 90, high: 160 } },
-          { key: 'addition', label: 'Addition', unit: 'sqft', range: { low: 120, high: 250 } },
-          { key: 'porch', label: 'Covered porch', unit: 'sqft', range: { low: 40, high: 120 } },
-          { key: 'bath', label: 'Bathroom remodel', unit: 'flat', range: { low: 8000, high: 30000 }, per: 'per bath' },
-          { key: 'kitchen', label: 'Kitchen remodel', unit: 'flat', range: { low: 15000, high: 60000 } },
-          { key: 'stairs', label: 'Staircase', unit: 'flat', range: { low: 2000, high: 8000 } },
+          { key: 'house', label: 'New house', unit: 'sqft', range: { low: 165, high: 210 }, size: { start: 1800, min: 800, max: 4000, step: 100 } },
+          { key: 'barndo', label: 'Barndominium kit', unit: 'sqft', range: { low: 110, high: 140 }, size: { start: 1600, min: 800, max: 4000, step: 100 } },
+          { key: 'addition', label: 'Addition', unit: 'sqft', range: { low: 150, high: 200 }, size: { start: 400, min: 100, max: 1500, step: 50 } },
+          { key: 'porch', label: 'Covered porch', unit: 'sqft', range: { low: 50, high: 80 }, size: { start: 250, min: 60, max: 800, step: 10 } },
+          { key: 'bath', label: 'Bathroom remodel', unit: 'flat', range: { low: 12000, high: 18000 } },
+          { key: 'kitchen', label: 'Kitchen remodel', unit: 'flat', range: { low: 25000, high: 40000 } },
+          { key: 'stairs', label: 'Stairs', unit: 'flat', range: { low: 3000, high: 5500 } },
           { key: 'remodel', label: 'Other remodel', unit: 'none' },
         ],
-        roundTo: 1000,
-        disclaimer: 'Ballpark from typical prices, not a quote.',
+        roundTo: 500,
+        disclaimer: 'A ballpark, not a quote. The free estimate gets you the real number.',
       },
     } satisfies SimplePlannerConfig,
     faqs: [
@@ -499,15 +435,15 @@ export const CONFIG = {
       },
       {
         q: 'What does a new house or barndominium cost?',
-        a: 'Ballpark, finished: a new house runs about $150 to $250 per square foot, and a barndominium kit built out about $90 to $160 per square foot. Use the planner above for a number on your size.',
+        a: 'Ballpark, finished: a new house runs about $165 to $210 per square foot, and a barndominium kit built out about $110 to $140 per square foot. Use the planner above for a number on your size.',
       },
       {
         q: 'Do you do additions and covered porches?',
-        a: 'Yes. Additions run about $120 to $250 per square foot and covered porches about $40 to $120 per square foot, ballpark.',
+        a: 'Yes. Additions run about $150 to $200 per square foot and covered porches about $50 to $80 per square foot, ballpark.',
       },
       {
         q: 'What does a bathroom or kitchen remodel cost?',
-        a: 'Ballpark: a bathroom remodel runs about $8,000 to $30,000 per bath, a kitchen remodel about $15,000 to $60,000, and a staircase about $2,000 to $8,000.',
+        a: 'Ballpark: most bathroom remodels run about $12,000 to $18,000, a kitchen remodel about $25,000 to $40,000, and a staircase about $3,000 to $5,500.',
       },
       {
         q: 'What areas do you serve?',

@@ -1,5 +1,5 @@
 // Shared bits for the planner islands (Cabinet, Custom, Build): option chips, money helpers,
-// the price table, the summary box, and the hand-off of the summary to the /book form.
+// the ballpark result box, and the hand-off of the summary to the /book form.
 import type { ComponentChildren } from 'preact'
 import { CONFIG } from '../../config'
 import type { PriceRange } from '../../config'
@@ -42,46 +42,6 @@ export function Chips({ name, options, value, onChange }: { name: string; option
   )
 }
 
-/** Small static table of general numbers, shown before any input. */
-export function PriceTable({ title, rows, note }: { title: string; rows: [string, string][]; note?: ComponentChildren }) {
-  return (
-    <div class="bg-warm-50 border border-warm-100 rounded-xl p-4">
-      <div class="text-sm font-semibold text-stone-900 mb-2">{title}</div>
-      <table class="w-full text-sm text-stone-700">
-        <tbody>
-          {rows.map(([label, value]) => (
-            <tr class="border-b border-warm-100 last:border-0">
-              <td class="py-1 pr-3">{label}</td>
-              <td class="py-1 text-right whitespace-nowrap">{value}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {note && <p class="text-xs text-stone-500 mt-2">{note}</p>}
-    </div>
-  )
-}
-
-/** Ballpark block inside the summary: optional breakdown lines, the total, or a plain line. */
-export function BallparkBox({ lines = [], total, text }: { lines?: [string, string][]; total?: PriceRange; text?: string }) {
-  return (
-    <div class="mt-4 pt-4 border-t border-warm-200">
-      <div class="text-sm font-semibold text-stone-900 mb-1">Ballpark</div>
-      {lines.length > 0 && (
-        <ul class="text-sm text-stone-700 space-y-0.5">
-          {lines.map(([k, v]) => (
-            <li>
-              {k}: {v}
-            </li>
-          ))}
-        </ul>
-      )}
-      {total && <div class="font-heading text-xl font-bold text-warm-800 mt-1">About {rangeText(total)}</div>}
-      {text && <p class="text-sm text-stone-700">{text}</p>}
-    </div>
-  )
-}
-
 /** Build the plain-text message the /book form gets prefilled with. */
 export function summaryText(title: string, rows: [string, string][]): string {
   return [title, ...rows.filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`)].join('\n')
@@ -97,13 +57,42 @@ export function sendToBook(message: string) {
   }
 }
 
-/** Card shell: heading, fields (children), summary + ballpark (extra), one disclaimer, send button. */
+/** Slider with the value read out next to it. Easier than typing a number on a phone. */
+export function Slider({ id, label, value, min, max, step, unit, hint, onChange }: { id: string; label: string; value: number; min: number; max: number; step: number; unit: string; hint?: string; onChange: (v: number) => void }) {
+  return (
+    <div>
+      <label for={id} class="flex items-baseline justify-between text-sm font-semibold text-stone-700 mb-2">
+        <span>{label}</span>
+        <span class="font-heading text-lg font-bold text-warm-800">
+          {value.toLocaleString('en-US')} {unit}
+        </span>
+      </label>
+      <input
+        id={id}
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onInput={(e) => onChange(Number((e.target as HTMLInputElement).value))}
+        class="w-full accent-warm-700 cursor-pointer"
+      />
+      {hint && <p class="text-xs text-stone-500 mt-1">{hint}</p>}
+    </div>
+  )
+}
+
+/**
+ * Card shell: heading, a few fields (children), then one result box with the ballpark,
+ * the send button and the phone number. Two columns on desktop, stacked on phones.
+ */
 export function PlannerCard({
   eyebrow,
   headline,
   subheadline,
-  rows,
-  extra,
+  total,
+  line,
+  text,
   disclaimer,
   onSend,
   children,
@@ -111,13 +100,15 @@ export function PlannerCard({
   eyebrow: string
   headline: string
   subheadline: string
-  rows: [string, string][]
-  extra?: ComponentChildren
+  /** The ballpark. Without it, `text` is shown instead. */
+  total?: PriceRange | null
+  /** One plain line under the number saying what it covers. */
+  line?: string
+  text?: string
   disclaimer?: string
   onSend: () => void
   children: ComponentChildren
 }) {
-  const filled = rows.filter(([, v]) => v)
   return (
     <div class="bg-white rounded-2xl border border-warm-100 p-6 md:p-8 shadow-sm">
       <div class="mb-6">
@@ -126,35 +117,36 @@ export function PlannerCard({
         <p class="text-stone-500 text-sm mt-1.5">{subheadline}</p>
       </div>
 
-      <div class="space-y-6">{children}</div>
+      <div class="grid md:grid-cols-2 gap-6 md:gap-8 items-start">
+        <div class="space-y-6">{children}</div>
 
-      <div class="mt-8 bg-warm-50 border border-warm-100 rounded-xl p-5" aria-live="polite">
-        <div class="text-sm font-semibold text-stone-900 mb-2">Your summary</div>
-        {filled.length === 0 ? (
-          <p class="text-sm text-stone-500">Pick a few options above and your summary shows up here.</p>
-        ) : (
-          <dl class="text-sm text-stone-700 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
-            {filled.map(([k, v]) => (
-              <>
-                <dt class="text-stone-500">{k}</dt>
-                <dd class="font-medium">{v}</dd>
-              </>
-            ))}
-          </dl>
-        )}
-        {extra}
+        <div class="bg-warm-50 border border-warm-100 rounded-xl p-5 md:p-6 md:sticky md:top-36" aria-live="polite">
+          <div class="text-xs font-semibold tracking-widest uppercase text-warm-700 mb-1">Your ballpark</div>
+          {total ? (
+            <div class="font-heading text-3xl font-bold text-stone-900 leading-tight">
+              {money(total.low)} <span class="text-xl font-semibold text-stone-500">to</span> {money(total.high)}
+            </div>
+          ) : (
+            <p class="font-heading text-xl font-bold text-stone-900">{text}</p>
+          )}
+          {line && <p class="text-sm text-stone-700 mt-2">{line}</p>}
+          {disclaimer && <p class="text-xs text-stone-500 mt-2">{disclaimer}</p>}
+
+          <button
+            type="button"
+            onClick={onSend}
+            class="mt-5 w-full bg-warm-700 hover:bg-warm-800 text-white px-6 py-3.5 rounded-xl font-semibold transition-colors cursor-pointer"
+          >
+            Send this to {RON} and {JAYME} <span aria-hidden="true">→</span>
+          </button>
+          <a
+            href={CONFIG.phone.href}
+            class="mt-3 block w-full text-center border border-warm-300 hover:border-warm-500 text-warm-800 px-3 py-3 rounded-xl font-semibold no-underline whitespace-nowrap transition-colors"
+          >
+            Or call {CONFIG.phone.display}
+          </a>
+        </div>
       </div>
-      {disclaimer && <p class="text-xs text-stone-500 mt-2">{disclaimer}</p>}
-
-      <button
-        type="button"
-        onClick={onSend}
-        disabled={filled.length === 0}
-        class="mt-6 w-full bg-warm-700 hover:bg-warm-800 text-white px-6 py-3.5 rounded-xl font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-      >
-        Send this to {RON} and {JAYME} <span aria-hidden="true">→</span>
-      </button>
-      <p class="text-xs text-stone-500 text-center mt-2">Opens the estimate form with all of this filled in.</p>
     </div>
   )
 }
