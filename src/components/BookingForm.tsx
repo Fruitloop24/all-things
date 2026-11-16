@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'preact/hooks'
 import { CONFIG } from '../config'
-import { PREFILL_KEY } from '../prefill'
+import { PREFILL_KEY } from './planner/prefill'
 
 type Step = 'info' | 'slots' | 'confirmed' | 'handoff' | 'requested'
 type PreferredWindow = 'morning' | 'afternoon' | 'anytime'

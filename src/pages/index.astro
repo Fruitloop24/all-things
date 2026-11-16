@@ -5,8 +5,8 @@ import Suppliers from '../components/Suppliers.astro'
 import QRCode from 'qrcode'
 import { CONFIG } from '../config'
 
-const { hero, services, progress, testimonials } = CONFIG
-const words = hero.rotatingWords
+const { hero, services, testimonials } = CONFIG
+const words = hero.panels.map((p) => p.word)
 
 const qrSvg = await QRCode.toString('https://allthingsflooringntile.com/', {
   type: 'svg',
@@ -33,7 +33,7 @@ const arrowIcon = 'M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3'
         </div>
         <h1 data-reveal data-reveal-delay="100" class="order-2 font-heading text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] mb-6">
           {hero.headline}
-          <span id="hero-word" data-words={JSON.stringify(words)} class="block text-warm-300 transition-opacity duration-300 motion-reduce:transition-none" aria-hidden="true">{words[0]}</span>
+          <span id="hero-word" class="block min-h-[1.1em] whitespace-nowrap text-warm-300" aria-hidden="true">{words[0]}</span>
           <span class="sr-only">{words.join(', ')}</span>
         </h1>
         <p data-reveal data-reveal-delay="200" class="order-4 text-lg sm:text-xl text-warm-200/90 leading-relaxed mb-8 max-w-lg">
@@ -42,7 +42,7 @@ const arrowIcon = 'M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3'
         <div data-reveal data-reveal-delay="300" class="order-5 flex flex-col sm:flex-row gap-4">
           <a
             href={CONFIG.cta.primary.href}
-            class="inline-flex items-center justify-center gap-2.5 bg-white text-warm-800 hover:bg-warm-100 px-8 py-4 rounded-xl text-base font-semibold transition-all no-underline shadow-lg shadow-black/20 hover:shadow-xl hover:-translate-y-0.5"
+            class="inline-flex items-center justify-center gap-2.5 bg-white text-warm-800 hover:bg-warm-100 px-8 lg:px-6 py-4 rounded-xl text-base font-semibold whitespace-nowrap transition-all no-underline shadow-lg shadow-black/20 hover:shadow-xl hover:-translate-y-0.5"
           >
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d={calendarIcon} />
@@ -51,7 +51,7 @@ const arrowIcon = 'M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3'
           </a>
           <a
             href={CONFIG.cta.secondary.href}
-            class="inline-flex items-center justify-center gap-2.5 border-2 border-warm-400/60 text-white hover:bg-white/10 px-8 py-4 rounded-xl text-base font-semibold transition-all no-underline backdrop-blur-sm"
+            class="inline-flex items-center justify-center gap-2.5 border-2 border-warm-400/60 text-white hover:bg-white/10 px-8 lg:px-6 py-4 rounded-xl text-base font-semibold whitespace-nowrap transition-all no-underline backdrop-blur-sm"
           >
             {CONFIG.cta.secondary.text}
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -83,6 +83,7 @@ const arrowIcon = 'M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3'
                   idx === 0 ? 'opacity-100' : 'opacity-0 pointer-events-none',
                 ]}
                 data-index={idx}
+                data-word={panel.word}
                 role="group"
                 aria-roledescription="slide"
                 aria-label={`${idx + 1} of ${hero.panels.length}: ${panel.label}`}
@@ -152,7 +153,7 @@ const arrowIcon = 'M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3'
     </div>
   </section>
 
-  <!-- ════════════ 2. WHAT WE DO ════════════ -->
+  <!-- ════════════ 2. PICK WHERE TO START (section cards) ════════════ -->
   <section class="py-16 md:py-24 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div data-reveal class="text-center mb-12">
@@ -161,82 +162,43 @@ const arrowIcon = 'M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3'
         <p class="text-stone-500 text-lg max-w-2xl mx-auto">{services.subheadline}</p>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {
           services.items.map((item, i) => (
-            <div data-reveal data-reveal-delay={String(i * 100)} class="bg-warm-50 rounded-2xl border border-warm-100 overflow-hidden flex flex-col hover:shadow-lg transition-shadow">
-              <a href={item.href} class="block aspect-[4/3] overflow-hidden bg-warm-100">
-                <img src={item.photo.src} alt={item.photo.alt} width={item.photo.w} height={item.photo.h} class="w-full h-full object-cover" loading="lazy" decoding="async" />
-              </a>
-              <div class="p-6 flex flex-col flex-1">
-                <h3 class="font-heading text-xl font-bold text-stone-900 mb-2">{item.title}</h3>
-                <p class="text-stone-600 text-sm leading-relaxed mb-4">{item.desc}</p>
-                {item.extra && (
-                  <a href={item.extra.href} class="group block bg-white border border-warm-200 rounded-xl p-4 mb-4 no-underline hover:border-warm-400 transition-colors">
-                    <span class="block text-sm font-semibold text-stone-800 mb-1">{item.extra.title}</span>
-                    <span class="block text-xs text-stone-500 leading-relaxed mb-2">{item.extra.desc}</span>
-                    <span class="inline-flex items-center gap-1 text-xs font-semibold text-warm-700">
-                      {item.extra.linkText}
-                      <svg class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d={arrowIcon} />
-                      </svg>
-                    </span>
-                  </a>
-                )}
-                <a href={item.href} class="group mt-auto inline-flex items-center gap-1.5 text-warm-700 hover:text-warm-800 text-sm font-semibold no-underline">
-                  {item.linkText}
-                  <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <a
+              href={item.href}
+              data-reveal
+              data-reveal-delay={String(i * 100)}
+              class="group relative block overflow-hidden rounded-2xl bg-warm-900 shadow-md hover:shadow-xl transition-shadow no-underline aspect-[16/10] sm:aspect-[4/5]"
+            >
+              <img
+                src={item.photo.src}
+                alt={item.photo.alt}
+                width={item.photo.w}
+                height={item.photo.h}
+                class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 motion-reduce:transition-none"
+                style={`object-position: ${item.position};`}
+                loading="lazy"
+                decoding="async"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent"></div>
+              <div class="absolute inset-x-0 bottom-0 p-5">
+                <h3 class="font-heading text-2xl font-bold text-white mb-1 flex items-center gap-2">
+                  {item.title}
+                  <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d={arrowIcon} />
                   </svg>
-                </a>
+                </h3>
+                <p class="text-white/85 text-sm leading-relaxed">{item.desc}</p>
               </div>
-            </div>
+            </a>
           ))
         }
       </div>
     </div>
   </section>
 
-  <!-- ════════════ 3. HALFWAY, THEN FINISHED ════════════ -->
-  <section class="py-16 md:py-24 bg-warm-50">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div data-reveal class="text-center mb-12">
-        <p class="text-warm-500 text-sm font-semibold tracking-widest uppercase mb-3">{progress.eyebrow}</p>
-        <h2 class="font-heading text-3xl md:text-4xl font-bold text-stone-900 mb-3">{progress.headline}</h2>
-        <p class="text-stone-500 max-w-xl mx-auto">{progress.subheadline}</p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-        {
-          progress.pairs.map((pair, i) => (
-            <div data-reveal data-reveal-delay={String(i * 100)} class="bg-white rounded-2xl border border-warm-100 shadow-sm p-3">
-              <div class="grid grid-cols-2 gap-2">
-                {[
-                  { label: 'Halfway', p: pair.halfway },
-                  { label: 'Finished', p: pair.finished },
-                ].map(({ label, p }) => (
-                  <figure class="relative rounded-lg overflow-hidden bg-warm-100" style={`aspect-ratio: ${pair.aspect};`}>
-                    <img src={p.src} alt={p.alt} width={p.w} height={p.h} class="w-full h-full object-cover" loading="lazy" decoding="async" />
-                    <figcaption
-                      class:list={[
-                        'absolute top-2 left-2 text-[11px] font-bold tracking-wider uppercase px-2 py-0.5 rounded',
-                        label === 'Finished' ? 'bg-warm-700 text-white' : 'bg-white/90 text-stone-700',
-                      ]}
-                    >
-                      {label}
-                    </figcaption>
-                  </figure>
-                ))}
-              </div>
-              <h3 class="font-heading text-lg font-bold text-stone-900 px-2 pt-3 pb-1">{pair.title}</h3>
-            </div>
-          ))
-        }
-      </div>
-    </div>
-  </section>
-
-  <!-- ════════════ 4. REVIEWS ════════════ -->
+  <!-- ════════════ 3. REVIEWS ════════════ -->
   <section class="py-16 md:py-24 bg-white texture-overlay">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div data-reveal class="text-center mb-12">
@@ -321,7 +283,7 @@ const arrowIcon = 'M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3'
     </div>
   </section>
 
-  <!-- ════════════ 4b. SUPPLIER LOGOS BAR ════════════ -->
+  <!-- ════════════ 4. SUPPLIER LOGOS BAR ════════════ -->
   <Suppliers />
 
   <!-- ════════════ 5. GET THE APP ════════════ -->
@@ -446,16 +408,18 @@ const arrowIcon = 'M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3'
   )
   revealEls.forEach((el) => obs.observe(el))
 
-  // Hero gallery: auto-advance 5s, pauses on hover/touch/focus, no auto-advance with reduced motion
+  // Hero gallery: ONE timeline. show() is the only thing that changes the panel, and it sets the
+  // headline word from the panel's data-word at the same moment. Auto-advance, arrows, dots and
+  // swipe all call show(). Pauses on hover/touch/keyboard focus; reduced motion = static first panel.
   const gallery = document.getElementById('hero-gallery')
   if (gallery) {
     const panels = gallery.querySelectorAll<HTMLElement>('.hero-panel')
     const dots = gallery.querySelectorAll<HTMLElement>('.hero-dot')
     const word = document.getElementById('hero-word')
-    const words: string[] = JSON.parse(word?.dataset.words ?? '[]')
+    const INTERVAL = 5000
     let idx = 0
-    let wordIdx = 0
     let paused = false
+    let timer: ReturnType<typeof setInterval> | undefined
     let resumeTimer: ReturnType<typeof setTimeout> | undefined
 
     const show = (i: number) => {
@@ -474,25 +438,25 @@ const arrowIcon = 'M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3'
         d.classList.toggle('w-1.5', !on)
         d.classList.toggle('bg-white/30', !on)
       })
-    }
-    const nextWord = () => {
-      if (!word || words.length < 2) return
-      wordIdx = (wordIdx + 1) % words.length
-      word.style.opacity = '0'
-      setTimeout(() => {
-        word.textContent = words[wordIdx]
-        word.style.opacity = '1'
-      }, 300)
+      const next = panels[idx]?.dataset.word
+      if (word && next && word.textContent !== next) {
+        word.textContent = next // plain swap, no fade: the word must never be invisible
+      }
     }
 
-    if (!reduceMotion) {
-      setInterval(() => {
+    // (Re)start the auto-advance clock so a manual change always gets a full interval.
+    const restart = () => {
+      if (reduceMotion) return
+      if (timer) clearInterval(timer)
+      timer = setInterval(() => {
         if (!paused && !document.hidden) show(idx + 1)
-      }, 5000)
-      setInterval(() => {
-        if (!document.hidden) nextWord()
-      }, 2500)
+      }, INTERVAL)
     }
+    const go = (i: number) => {
+      show(i)
+      restart()
+    }
+    restart()
 
     const pause = () => {
       paused = true
@@ -500,18 +464,44 @@ const arrowIcon = 'M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3'
     }
     const resumeLater = (ms: number) => {
       if (resumeTimer) clearTimeout(resumeTimer)
-      resumeTimer = setTimeout(() => (paused = false), ms)
+      resumeTimer = setTimeout(() => {
+        paused = false
+        restart()
+      }, ms)
     }
     gallery.addEventListener('mouseenter', pause)
     gallery.addEventListener('mouseleave', () => resumeLater(0))
-    gallery.addEventListener('focusin', pause)
-    gallery.addEventListener('focusout', () => resumeLater(0))
-    gallery.addEventListener('touchstart', pause, { passive: true })
-    gallery.addEventListener('touchend', () => resumeLater(8000), { passive: true })
+    gallery.addEventListener('focusin', (e) => {
+      if ((e.target as HTMLElement).matches?.(':focus-visible')) pause()
+    })
+    gallery.addEventListener('focusout', () => {
+      if (!gallery.matches(':hover')) resumeLater(0)
+    })
 
-    document.getElementById('hero-prev')?.addEventListener('click', () => show(idx - 1))
-    document.getElementById('hero-next')?.addEventListener('click', () => show(idx + 1))
-    dots.forEach((d) => d.addEventListener('click', () => show(Number(d.dataset.index))))
+    // Touch: pause while touching, swipe left/right to change panel, resume a bit after.
+    let touchX: number | null = null
+    gallery.addEventListener(
+      'touchstart',
+      (e) => {
+        pause()
+        touchX = e.touches[0]?.clientX ?? null
+      },
+      { passive: true }
+    )
+    gallery.addEventListener(
+      'touchend',
+      (e) => {
+        const endX = e.changedTouches[0]?.clientX
+        if (touchX !== null && endX !== undefined && Math.abs(endX - touchX) > 40) show(idx + (endX < touchX ? 1 : -1))
+        touchX = null
+        resumeLater(8000)
+      },
+      { passive: true }
+    )
+
+    document.getElementById('hero-prev')?.addEventListener('click', () => go(idx - 1))
+    document.getElementById('hero-next')?.addEventListener('click', () => go(idx + 1))
+    dots.forEach((d) => d.addEventListener('click', () => go(Number(d.dataset.index))))
   }
 
   // Review carousel: auto-rotate 7s

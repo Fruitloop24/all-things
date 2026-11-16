@@ -1,0 +1,39 @@
+---
+// Full-bleed photo banner directly under the header, H1 over the photo, intro underneath.
+import type { Photo } from '../config'
+
+interface Props {
+  photo: Photo
+  position?: string
+  eyebrow: string
+  headline: string
+  intro: string
+}
+const { photo, position = 'center', eyebrow, headline, intro } = Astro.props
+---
+
+<section class="bg-warm-50 border-b border-warm-200">
+  <div class="relative w-full h-[40vh] min-h-[220px] md:h-[55vh] md:min-h-[320px] max-h-[640px] overflow-hidden bg-warm-900">
+    <img
+      src={photo.src}
+      alt={photo.alt}
+      width={photo.w}
+      height={photo.h}
+      class="absolute inset-0 w-full h-full object-cover"
+      style={`object-position: ${position};`}
+      loading="eager"
+      fetchpriority="high"
+      decoding="async"
+    />
+    <div class="absolute inset-0 bg-gradient-to-t from-warm-900/85 via-warm-900/25 to-transparent"></div>
+    <div class="absolute inset-x-0 bottom-0">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-6 md:pb-10">
+        <p class="text-warm-200 text-xs font-semibold tracking-widest uppercase mb-2">{eyebrow}</p>
+        <h1 class="font-heading text-3xl md:text-5xl font-bold text-white drop-shadow">{headline}</h1>
+      </div>
+    </div>
+  </div>
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
+    <p class="text-stone-600 text-base md:text-lg leading-relaxed max-w-3xl">{intro}</p>
+  </div>
+</section>

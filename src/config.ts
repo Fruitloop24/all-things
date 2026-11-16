@@ -25,21 +25,43 @@ export interface PriceRange {
 }
 
 /**
- * Cabinet pricing for the Cabinet Planner. Waiting on Ron's numbers.
- * While CONFIG.cabinets.pricing is null the planner shows NO dollar figures.
+ * Cabinet pricing for the Cabinet Planner ballpark.
+ * If CONFIG.cabinets.pricing is null the planner shows NO dollar figures.
  */
 export interface CabinetPricing {
-  /** Installed cabinet cost per linear foot of wall, one entry per grade. */
+  /** Installed cabinet cost per linear foot of wall, one entry per grade (keys match planner.grades). */
   grades: { key: string; label: string; perLinearFoot: PriceRange }[]
-  /** Countertop adders per linear foot, keyed by planner countertop key. */
-  countertopPerLinearFoot: Partial<Record<'butcher' | 'stone' | 'laminate', PriceRange>>
-  /** Optional fine print shown under the range. */
+  /** Installed countertop cost per square foot, keyed by planner countertop key. */
+  countertopPerSqFt: Partial<Record<'butcher' | 'stone' | 'laminate', PriceRange>>
+  /** Square feet of countertop assumed per linear foot of wall. */
+  countertopSqFtPerLinearFoot: number
+  /** Plain-words disclaimer, shown next to every dollar figure. */
+  disclaimer: string
+}
+
+/** A simple "tell us about it" planner: chips + short text fields, summary goes to /book. No prices. */
+export interface PlannerField {
+  key: string
+  label: string
+  /** Label used in the summary sent to /book (defaults to label). */
+  short?: string
+  type: 'chips' | 'text'
+  options?: { key: string; label: string }[]
+  placeholder?: string
+  hint?: string
+}
+export interface SimplePlannerConfig {
+  eyebrow: string
+  headline: string
+  subheadline: string
+  summaryTitle: string
   note?: string
+  fields: PlannerField[]
 }
 
 const photo = (name: string, alt: string, w: number, h: number): Photo => ({ src: `${WORK}/${name}.webp`, alt, w, h })
 
-// Every photo below is a real job (or shop) photo. No stock, no generated images.
+// Every photo below is a real job (or shop) photo, except barndoExample (owner-approved example, captioned as such).
 export const PHOTOS = {
   boy: { src: `${R2}/hero.jpg`, alt: 'A little boy standing between two displays of floor sample boards', w: 526, h: 701 },
   whiteKitchen: photo('cabinets-white-kitchen-wood-island', 'White kitchen cabinets with a stained wood island and pendant lights', 1600, 1200),
@@ -65,13 +87,13 @@ export const PHOTOS = {
   showerBench: photo('tile-shower-marble-bench', 'Marble-look tile shower with a bench and mosaic floor', 900, 1600),
   showerNiche: photo('tile-shower-marble-niche', 'Marble-look tile shower with a mosaic niche and a bench', 1600, 1200),
   showerWalkIn: photo('tile-shower-walk-in', 'Walk-in tile shower with a pebble floor', 1600, 1060),
-  halfwayMural: photo('before-tile-mural', 'Tile mural set on the range wall, cabinets and range not in yet', 1600, 1200),
-  halfwayStairs: photo('before-stairs', 'Staircase mid-job with new treads going in', 1200, 1600),
-  halfwayGreenKitchen: photo('before-green-kitchen', 'Green kitchen mid-job with butcher block tops in and a cabinet still open', 1600, 1200),
   barrelTable: photo('custom-barrel-table', 'Whiskey barrel table with a cabinet door in the side and a poured epoxy top', 880, 1640),
   barrelTableShop: photo('custom-barrel-table-shop', 'The whiskey barrel table standing in the shop', 880, 1640),
   epoxyTop: photo('custom-epoxy-top', 'Round poured epoxy table top with wood and antlers set in it', 880, 1640),
   epoxyTopAntlers: photo('custom-epoxy-top-antlers', 'Close-up of the epoxy top with antlers and wood set in it', 720, 1280),
+  // Owner-approved EXAMPLE image (not one of their jobs). Always captioned as an example. Swap for a real barndominium photo when Ron sends one.
+  barndoExample: { src: `${WORK}/build-barndominium-example.webp`, alt: 'Example barndominium interior with exposed beams, a wood floor and a stone fireplace', w: 1072, h: 1072 },
+  farmhouse: photo('build-farmhouse-exterior', 'Finished white farmhouse new build with a covered porch and a dark shingle roof', 1584, 993),
 } satisfies Record<string, Photo>
 
 export const CONFIG = {
@@ -82,8 +104,8 @@ export const CONFIG = {
 
   // ─── SEO (default meta description, JSON-LD, PWA) ───
   seo: {
-    description: 'Cabinets, flooring, tile showers and remodels in Eastman, GA and Dodge County. Set up a free estimate online or call (478) 298-6012.',
-    services: ['Cabinets', 'Kitchen cabinets', 'Built-ins', 'Flooring', 'Flooring installation', 'Tile', 'Tile showers', 'Remodeling', 'Bathroom remodeling', 'Custom work'],
+    description: 'Cabinets, flooring, tile showers, remodels and new builds in Eastman, GA and Dodge County. Set up a free estimate online or call (478) 298-6012.',
+    services: ['Cabinets', 'Kitchen cabinets', 'Built-ins', 'Flooring', 'Flooring installation', 'Tile', 'Tile showers', 'Remodeling', 'Bathroom remodeling', 'New home construction', 'Barndominium kits', 'Additions and covered porches', 'Custom work'],
   },
 
   // ─── IMAGES (R2 CDN) ───
@@ -170,11 +192,12 @@ export const CONFIG = {
   nav: [
     { to: '/', label: 'Home' },
     { to: '/cabinets', label: 'Cabinets' },
-    { to: '/custom', label: 'Custom Work' },
-    { to: '/studio', label: 'Design Studio' },
-    { to: '/about', label: 'About Us' },
+    { to: '/build', label: 'Build & Remodel', short: 'Build' },
+    { to: '/custom', label: 'Custom Work', short: 'Custom' },
+    { to: '/studio', label: 'Design Studio', short: 'Studio' },
+    { to: '/about', label: 'About Us', short: 'About' },
     { to: '/resources', label: 'Resources' },
-  ],
+  ] as { to: string; label: string; short?: string }[],
   mobileNav: [
     { to: '/', label: 'Home', icon: 'home' },
     { to: '/cabinets', label: 'Cabinets', icon: 'cabinets' },
@@ -186,38 +209,26 @@ export const CONFIG = {
   hero: {
     badge: 'Serving Eastman & Dodge County Since 2009',
     headline: 'Let us help with your next',
-    rotatingWords: ['kitchen', 'bathroom', 'floor', 'build'],
-    subheadline: 'Cabinets, floors, tile showers and remodels from a family crew in Eastman. Tell us what you need and we will set up a free estimate.',
+    subheadline: 'Cabinets, floors, tile showers, remodels and new builds from a family crew in Eastman. Tell us what you need and we will set up a free estimate.',
+    // Each panel carries its own headline word; the word changes with the panel.
     panels: [
-      { label: 'Floors for the whole family', photos: [PHOTOS.boy] },
-      { label: 'We handle cabinets', photos: [PHOTOS.whiteKitchen, PHOTOS.blueIsland, PHOTOS.laundry, PHOTOS.fireplace] },
-      { label: 'Build or remodel', photos: [PHOTOS.stairs, PHOTOS.hallStairs, PHOTOS.masterBath, PHOTOS.bonusRoom] },
+      { label: 'Floors for the whole family', word: 'floor', photos: [PHOTOS.boy] },
+      { label: 'We handle cabinets', word: 'kitchen', photos: [PHOTOS.whiteKitchen, PHOTOS.blueIsland, PHOTOS.laundry, PHOTOS.fireplace] },
+      { label: 'Tile showers', word: 'bathroom', photos: [PHOTOS.showerSubway, PHOTOS.showerBench, PHOTOS.showerNiche, PHOTOS.showerWalkIn] },
+      { label: 'Build or remodel', word: 'build', photos: [PHOTOS.stairs, PHOTOS.hallStairs, PHOTOS.masterBath, PHOTOS.bonusRoom] },
     ],
   },
 
-  // ─── WHAT WE DO (landing cards) ───
+  // ─── PICK WHERE TO START (landing section cards: full photo, name, one line) ───
   services: {
     eyebrow: 'What We Do',
-    headline: 'Cabinets, Floors, Tile and Remodels',
-    subheadline: 'One crew for the whole job, from the cabinets to the floor under them.',
+    headline: 'Pick Where to Start',
+    subheadline: 'One crew and one phone number, from the slab to the cabinets, floors and tile.',
     items: [
-      { title: 'Cabinets', desc: 'Kitchens, baths, laundry rooms, pantries, closets and built-ins.', photo: PHOTOS.whiteKitchen, href: '/cabinets', linkText: 'See our cabinets' },
-      { title: 'Floors', desc: 'Hardwood, luxury vinyl plank, tile, carpet, laminate and VCT. One room or the whole house.', photo: PHOTOS.bonusRoom, href: '/book', linkText: 'Set up an estimate',
-        extra: { title: 'Design Studio', desc: 'See a new floor in a photo of your room and get a ballpark price.', href: '/studio', linkText: 'Try the Design Studio' } },
-      { title: 'Tile and showers', desc: 'Walk-in showers, benches and niches, backsplashes and tile floors.', photo: PHOTOS.showerNiche, href: '/book', linkText: 'Set up an estimate' },
-      { title: 'Build and remodel', desc: 'Bathroom remodels, stairs, porches and whole-house builds.', photo: PHOTOS.hallStairs, href: '/custom', linkText: 'See custom work' },
-    ],
-  },
-
-  // ─── HALFWAY, THEN FINISHED (real mid-job / finished pairs) ───
-  progress: {
-    eyebrow: 'Our Work',
-    headline: 'Halfway, Then Finished',
-    subheadline: 'Real jobs, shot partway through and again when we wrapped up.',
-    pairs: [
-      { title: 'Range wall with a tile mural', halfway: PHOTOS.halfwayMural, finished: PHOTOS.rangeWall, aspect: '4/3' },
-      { title: 'Staircase', halfway: PHOTOS.halfwayStairs, finished: PHOTOS.stairs, aspect: '3/4' },
-      { title: 'Green kitchen with butcher block', halfway: PHOTOS.halfwayGreenKitchen, finished: PHOTOS.greenKitchen, aspect: '4/3' },
+      { title: 'Cabinets', desc: 'Kitchens, baths, laundry rooms, pantries, closets and built-ins. Get a ballpark online.', photo: PHOTOS.whiteKitchen, position: 'center 50%', href: '/cabinets' },
+      { title: 'Build & Remodel', desc: 'New houses and barndominium kits built start to finish, plus additions, porches and remodels.', photo: PHOTOS.farmhouse, position: 'center 60%', href: '/build' },
+      { title: 'Custom Work', desc: 'Tables, bars, built-ins and one-off pieces, priced after we talk.', photo: PHOTOS.barrelTableShop, position: 'center 62%', href: '/custom' },
+      { title: 'Floors', desc: 'Hardwood, vinyl plank, tile and carpet. See a new floor in a photo of your room.', photo: PHOTOS.bonusRoom, position: 'center 70%', href: '/studio' },
     ],
   },
 
@@ -238,7 +249,9 @@ export const CONFIG = {
     description: 'Kitchen, bath, laundry, pantry, closet and built-in cabinets in Eastman, GA and Dodge County. See real jobs and plan yours with the Cabinet Planner.',
     eyebrow: 'Cabinets',
     headline: 'Cabinets in Eastman, GA',
-    intro: 'Cabinets are a big part of what we do. Kitchens, baths, laundry rooms, pantries, closets and built-ins, plus the countertops, tile and floors that go with them. Here are some of our jobs. When you are ready, use the planner below to tell us about yours.',
+    intro: 'Cabinets are a big part of what we do. Kitchens, baths, laundry rooms, pantries, closets and built-ins, plus the countertops, tile and floors that go with them. Start with the planner for a ballpark, then scroll down for some of our jobs.',
+    banner: { photo: PHOTOS.blueIsland, position: 'center 55%' },
+    galleryHeadline: 'Some of our cabinet jobs',
     groups: [
       { title: 'Kitchens', photos: [PHOTOS.whiteKitchen, PHOTOS.blueIsland, PHOTOS.rangeWall, PHOTOS.greenKitchen, PHOTOS.greenKitchen2] },
       { title: 'Laundry, pantry and closets', photos: [PHOTOS.laundry, PHOTOS.laundry2, PHOTOS.pantry, PHOTOS.closet, PHOTOS.closet2] },
@@ -248,7 +261,13 @@ export const CONFIG = {
     planner: {
       eyebrow: 'Cabinet Planner',
       headline: 'Plan your cabinets',
-      subheadline: 'Pick what fits. Rough is fine. We will go over the details when we come out to measure.',
+      subheadline: 'Pick what fits. Rough is fine. Add a wall length for a ballpark, and we will go over the details when we come out to measure.',
+      grades: [
+        { key: 'stock', label: 'Ready-made' },
+        { key: 'semi', label: 'Semi-custom' },
+        { key: 'custom', label: 'Custom built' },
+        { key: 'unsure', label: 'Not sure' },
+      ],
       rooms: [
         { key: 'kitchen', label: 'Kitchen' },
         { key: 'bath', label: 'Bath' },
@@ -276,8 +295,22 @@ export const CONFIG = {
         { key: 'planning', label: 'Just planning' },
       ],
     },
-    // Waiting on Ron's numbers. Leave null and the planner shows no prices at all.
-    pricing: null as CabinetPricing | null,
+    // GENERAL typical installed ranges, NOT Ron's own price list. Replace with Ron's numbers when he sends them.
+    // Set to null to hide every dollar figure in the planner.
+    pricing: {
+      grades: [
+        { key: 'stock', label: 'Ready-made / stock', perLinearFoot: { low: 150, high: 300 } },
+        { key: 'semi', label: 'Semi-custom', perLinearFoot: { low: 250, high: 650 } },
+        { key: 'custom', label: 'Custom built', perLinearFoot: { low: 500, high: 1200 } },
+      ],
+      countertopPerSqFt: {
+        laminate: { low: 25, high: 50 },
+        butcher: { low: 40, high: 100 },
+        stone: { low: 60, high: 150 },
+      },
+      countertopSqFtPerLinearFoot: 2,
+      disclaimer: 'This is a ballpark from typical installed prices, not a quote. The real number comes after we measure.',
+    } as CabinetPricing | null,
   },
 
   // ─── CUSTOM WORK PAGE ───
@@ -286,7 +319,31 @@ export const CONFIG = {
     description: 'One-off custom pieces, stairs and built-ins from All Things Flooring & Tile in Eastman, GA. Tell us what you have in mind.',
     eyebrow: 'Custom Work',
     headline: 'Custom Work',
-    intro: 'Some jobs are not on any list. If you have something in mind, tell us about it.',
+    intro: 'Some jobs are not on any list. If you have something in mind, tell us about it. Every custom piece is priced after a conversation, so there are no set prices here.',
+    banner: { photo: PHOTOS.epoxyTopAntlers, position: 'center 50%' },
+    planner: {
+      eyebrow: 'Custom Planner',
+      headline: 'Tell us what you want built',
+      subheadline: 'A few quick picks so we know where to start. Every custom piece is priced after we talk it through.',
+      summaryTitle: 'Custom piece',
+      fields: [
+        { key: 'what', label: 'What is it?', short: 'Piece', type: 'chips', options: [
+          { key: 'table', label: 'Table' },
+          { key: 'bar', label: 'Bar' },
+          { key: 'builtin', label: 'Built-in' },
+          { key: 'shelving', label: 'Shelving' },
+          { key: 'countertop', label: 'Countertop' },
+          { key: 'other', label: 'Other' },
+        ] },
+        { key: 'size', label: 'Rough size', type: 'text', placeholder: 'About 4 ft round, 30 in tall', hint: 'A guess is fine.' },
+        { key: 'finish', label: 'Wood or finish, if you know', short: 'Wood / finish', type: 'text', placeholder: 'Oak with an epoxy top' },
+        { key: 'timing', label: 'Timing', type: 'chips', options: [
+          { key: 'asap', label: 'ASAP' },
+          { key: '1-3', label: '1 to 3 months' },
+          { key: 'planning', label: 'Just planning' },
+        ] },
+      ],
+    } satisfies SimplePlannerConfig,
     feature: {
       title: 'Whiskey barrel table',
       desc: 'A whiskey barrel turned into a table, with a cabinet door set into the side and a poured epoxy top with wood and antlers set in it.',
@@ -300,6 +357,65 @@ export const CONFIG = {
     cta: {
       headline: 'Tell us what you have in mind',
       text: 'Send us a few lines about the idea and a good time to talk. We will call or text to go over it.',
+    },
+  },
+
+  // ─── BUILD AND REMODEL PAGE ───
+  build: {
+    title: 'Build and Remodel',
+    description: 'New house builds, barndominium kits, additions, covered porches and remodels in Eastman, GA and Dodge County. Tell us what you are planning.',
+    eyebrow: 'Build & Remodel',
+    headline: 'Build and Remodel',
+    intro: 'Ron\'s crew builds the whole thing. A barndominium arrives as a kit, a house starts as a set of plans, and the same crew takes it from the slab to the cabinets, floors and tile. One crew, one phone number. We also do additions, covered porches and whole-room remodels. Every build is priced after we talk it through.',
+    banner: { photo: PHOTOS.farmhouse, position: 'center 60%' },
+    planner: {
+      eyebrow: 'Build Planner',
+      headline: 'Tell us what you are planning',
+      subheadline: 'A few quick picks so we know where to start. No prices here: every build is priced after we talk it through.',
+      summaryTitle: 'Build or remodel',
+      fields: [
+        { key: 'project', label: 'What are you planning?', short: 'Project', type: 'chips', options: [
+          { key: 'house', label: 'New house' },
+          { key: 'barndo', label: 'Barndominium kit' },
+          { key: 'addition', label: 'Addition or porch' },
+          { key: 'remodel', label: 'Remodel' },
+        ] },
+        { key: 'sqft', label: 'Rough square feet', type: 'text', placeholder: '1,800', hint: 'A guess is fine.' },
+        { key: 'land', label: 'Do you have land or plans yet?', short: 'Land / plans', type: 'chips', options: [
+          { key: 'both', label: 'Land and plans' },
+          { key: 'land', label: 'Land, no plans' },
+          { key: 'neither', label: 'Not yet' },
+          { key: 'na', label: 'Remodel, not needed' },
+        ] },
+        { key: 'timing', label: 'Timing', type: 'chips', options: [
+          { key: 'asap', label: 'ASAP' },
+          { key: '3-6', label: '3 to 6 months' },
+          { key: 'planning', label: 'Just planning' },
+        ] },
+      ],
+    } satisfies SimplePlannerConfig,
+    sections: {
+      newBuilds: {
+        title: 'New builds',
+        desc: 'A finished farmhouse new build, outside and in.',
+        photos: [PHOTOS.farmhouse, PHOTOS.blueIsland, PHOTOS.masterBath, PHOTOS.hallStairs, PHOTOS.bonusRoom],
+      },
+      barndo: {
+        title: 'Barndominium kits',
+        desc: 'The kit comes in and our crew builds it start to finish, from the slab to the cabinets, floors and tile, so you have one crew and one phone number the whole way. Tell us about the kit you are looking at, or the land you have, and we will talk it through.',
+        photo: PHOTOS.barndoExample,
+        caption: 'Example barndominium interior',
+      },
+      remodels: {
+        title: 'Remodels and additions',
+        desc: 'Bathrooms, stairs, covered porches and whole rooms.',
+        photos: [PHOTOS.stairs, PHOTOS.masterBath, PHOTOS.clawfootTub, PHOTOS.showerSubway],
+      },
+    },
+    review: 'Stephanie Griffis',
+    cta: {
+      headline: 'Tell us what you are planning',
+      text: 'Send us the basics and a good time to talk. We will call or text to go over it.',
     },
   },
 
@@ -364,11 +480,11 @@ export const CONFIG = {
         funFact: 'Go Dawgs!',
       },
       {
-        name: 'Jamie Fordham',
+        name: 'Jayme Fordham',
         role: 'Sales & Installation',
         initials: 'JF',
         photo: 'jamie',
-        bio: "Another Eastman original. Jamie grew up playing baseball for the Dodge County Indians and never left. Why would you? He knows flooring like he knows a fastball: get it right, get it done, and make it look good. Family man, ballgame regular, and the guy who'll give you the honest answer even if it's not the expensive one. Fair warning: he pulls for Alabama. Nobody's perfect.",
+        bio: "Another Eastman original. Jayme grew up playing baseball for the Dodge County Indians and never left. Why would you? He knows flooring like he knows a fastball: get it right, get it done, and make it look good. Family man, ballgame regular, and the guy who'll give you the honest answer even if it's not the expensive one. Fair warning: he pulls for Alabama. Nobody's perfect.",
         funFact: 'Roll Tide (sorry)',
       },
     ],
@@ -378,7 +494,7 @@ export const CONFIG = {
         role: 'Installation',
         initials: 'LF',
         photo: 'landin',
-        bio: "Jamie's oldest. Landin grew up on job sites and played baseball at DCHS just like his dad. He brings precision to every install: tile, hardwood, LVP, you name it. Quiet worker, loud results. And yes, by some unfortunate twist of fate, he also pulls for Alabama.",
+        bio: "Jayme's oldest. Landin grew up on job sites and played baseball at DCHS just like his dad. He brings precision to every install: tile, hardwood, LVP, you name it. Quiet worker, loud results. And yes, by some unfortunate twist of fate, he also pulls for Alabama.",
         funFact: 'DCHS Baseball alum',
       },
       {
@@ -386,7 +502,7 @@ export const CONFIG = {
         role: 'Installation',
         initials: 'GF',
         photo: 'gavin',
-        bio: "The youngest Fordham on the crew but don't let that fool you. Gavin's been helping his dad install floors since before he could drive. Another DCHS ballplayer with a serious work ethic and an eye for the details that matter. The Alabama thing? Blame Jamie.",
+        bio: "The youngest Fordham on the crew but don't let that fool you. Gavin's been helping his dad install floors since before he could drive. Another DCHS ballplayer with a serious work ethic and an eye for the details that matter. The Alabama thing? Blame Jayme.",
         funFact: 'Blame his dad',
       },
     ],
@@ -404,7 +520,7 @@ export const CONFIG = {
     },
     {
       q: 'How much do new cabinets cost?',
-      a: 'It depends on the room, how much wall you are covering, the look and the countertop, so we price every cabinet job after we measure. Send us the basics with the Cabinet Planner or set up an estimate and we will go over it with you.',
+      a: 'It depends on the room, how much wall you are covering, the cabinet grade and the countertop. The Cabinet Planner on our Cabinets page gives you a ballpark from typical installed prices. That is not a quote: the real number comes after we measure.',
     },
     {
       q: 'Can you do the countertops, tile and floors too?',
@@ -412,7 +528,7 @@ export const CONFIG = {
     },
     {
       q: 'Do you do remodels and builds?',
-      a: 'Yes. Bathroom remodels, tile showers, stairs, porches and whole-house builds, plus custom one-off pieces. Tell us what you have in mind.',
+      a: 'Yes. We build new houses and barndominium kits start to finish: the kit or the plans come in, and the same crew takes it from the slab to the cabinets, floors and tile. One crew, one phone number. We also do additions, covered porches, bathroom remodels, tile showers and stairs. See the Build and Remodel page.',
     },
     {
       q: 'What areas do you serve?',
@@ -483,6 +599,7 @@ export const CONFIG = {
     links: [
       { label: 'Home', to: '/' },
       { label: 'Cabinets', to: '/cabinets' },
+      { label: 'Build & Remodel', to: '/build' },
       { label: 'Custom Work', to: '/custom' },
       { label: 'Design Studio', to: '/studio' },
       { label: 'About Us', to: '/about' },
