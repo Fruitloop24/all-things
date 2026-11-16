@@ -1,21 +1,18 @@
 # All Things Flooring & Tile
 
-Website and PWA for **All Things Flooring & Tile** — a flooring business in Eastman, GA serving Dodge County and surrounding areas since 2009.
+Website and PWA for **All Things Flooring & Tile**: cabinets, flooring, tile and remodels in Eastman, GA, serving Dodge County and surrounding areas since 2009. The showroom closed 2026-08-31; phone and the site are the only ways in.
 
 **Live site:** https://allthingsflooringntile.com (Cloudflare Pages — build command: `npm run build`, output: `dist`)
 
 ## What This Is
 
-A full-featured business website with:
-
-- **AI Room Visualizer** — upload a photo of your room, pick a floor, see it transformed instantly using Gemini AI
-- **Cost Calculator** — real pricing with 5 floor types, DIY/Pro toggle, prep options, and a live price range
-- **PWA** — installable app with offline caching, home screen icon, the works
-- **QR Code Install** — landing page has a QR code + instructions for customers to install the app
-- **Sq Ft Challenge Game** — interactive game on the Resources page to practice calculating square footage of odd-shaped rooms
-- **Newsletter** — Google Forms integration for email signups
-- **Community Page** — involvement cards, events timeline, Facebook group link
-- **Config-driven** — all business info, pricing, CTAs, and content lives in `src/config.ts`
+- **Cabinets first:** landing hero is a rotating gallery of real jobs; `/cabinets` gallery + **Cabinet Planner** (summary handed to `/book`; prices hidden until `CONFIG.cabinets.pricing` is filled in)
+- **Custom work** page (barrel table, stairs, built-ins)
+- **Set up an estimate** (`/book`): quick-connect form, not a booked appointment. Ron or Jamie call or text to settle the time
+- **Design Studio** (`/studio`): room visualizer + flooring cost calculator
+- **Real Google reviews** (verbatim) and real job photos only (R2: `all-thing/site-images/work/`)
+- **PWA** with QR install, **Sq Ft Challenge** game on Resources
+- **Config-driven:** all content lives in `src/config.ts`
 
 ## Tech Stack
 
@@ -33,64 +30,28 @@ A full-featured business website with:
 
 | Route | What It Does |
 |-------|-------------|
-| `/` | Hero, services, project showcase, testimonials, supplier logos, QR install, showroom CTA |
-| `/studio` | AI Visualizer + Cost Calculator (Preact island) |
-| `/about` | Team bios — Ron, Jamie, Landin, Gavin |
-| `/community` | Community involvement, events timeline, Facebook group, contact |
-| `/resources` | Sq ft guide, Sq Ft Challenge game (Preact island), YouTube videos, newsletter signup |
-| `/newsletter` | Dedicated newsletter signup page |
-| `/partners` | Supplier partnerships and materials |
+| `/` | Rotating hero gallery, what we do, halfway/finished pairs, reviews, suppliers, app install, FAQ, CTA |
+| `/cabinets` | Cabinet photos by room + Cabinet Planner (Preact island) |
+| `/custom` | Custom work, stairs, built-ins |
+| `/book` | Set up an estimate (BookingForm island) + supplier bar |
+| `/studio` | Room visualizer + cost calculator (Preact island) |
+| `/about` | Team bios: Ron, Jamie, Landin, Gavin |
+| `/resources` | Sq ft guide, Sq Ft Challenge game, YouTube videos, newsletter signup |
 
-## Project Structure
+Removed 2026-11: `/newsletter`, `/community`, `/partners` (301 to `/` via `public/_redirects`).
 
-```
-src/
-  config.ts                    # Single source of truth for ALL content & pricing
-  env.d.ts                     # Astro + PWA type refs
-  pwa.ts                       # Service worker registration
-  layouts/
-    Base.astro                 # SEO, OG, geo meta, PWA manifest, header/footer shell
-  components/
-    Header.astro               # Desktop nav + mobile toggle
-    Footer.astro               # Links, contact, copyright
-    MobileNav.astro            # Bottom nav bar for mobile
-    SchemaLocalBusiness.astro  # JSON-LD structured data
-    Studio.tsx                 # Preact island — AI Visualizer + Cost Calculator
-    SqFtChallenge.tsx          # Preact island — sq ft practice game
-  pages/
-    index.astro                # Landing
-    studio.astro               # Mounts <Studio client:load />
-    about.astro                # Team bios
-    community.astro            # Events, involvement, connect
-    resources.astro            # Guides, YouTube, sq ft game
-    newsletter.astro           # Email signup
-    partners.astro             # Supplier partnerships
-  styles/
-    global.css                 # Tailwind import + @theme CSS vars
-public/
-  favicon.svg                  # Brown AT monogram
-  pwa-192.png, pwa-512.png     # PWA icons
-  apple-touch-icon.png         # iOS home screen icon
-worker/
-  src/index.js                 # Cloudflare Worker — /generate endpoint
-  wrangler.toml                # R2 binding + rate limiter binding
-astro.config.ts                # Integrations + PWA manifest config
-```
+File layout: see `CLAUDE.md`.
 
 ## Config-Driven Architecture
 
 **`src/config.ts`** is the single source of truth. Edit it to change:
 
-- Business name, phone, address, hours
-- All CTA buttons and links (booking, email, phone)
-- Navigation links
-- Hero content, services, testimonials
-- Team bios and photos
-- Calculator pricing (materials, labor, margins, tax)
-- Community events and involvement
-- YouTube video IDs
-- Supplier logos
-- Studio worker URL
+- Business name, phone, address (no store hours: showroom closed)
+- CTAs ("Set up an estimate", never "Book"), navigation, footer links
+- Job photos (`PHOTOS`), hero panels, what-we-do cards, halfway/finished pairs
+- Reviews (real, verbatim), FAQ, team bios
+- Cabinets page + planner options, `cabinets.pricing` (null until Ron's numbers)
+- Flooring calculator pricing, YouTube IDs, supplier logos, studio worker URL
 
 ## Commands
 
@@ -130,4 +91,3 @@ Set via `wrangler secret put` (these do NOT go in the frontend):
 - **Location:** 1245 College St, Eastman, GA 31023
 - **Phone:** (478) 298-6012
 - **Email:** kc@cerul.org
-- **Hours:** Monday-Friday 8am-4pm

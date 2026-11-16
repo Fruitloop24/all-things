@@ -1,6 +1,6 @@
 # All Things Flooring & Tile
 
-Website for a flooring business in Eastman, GA. Astro (static) + Preact islands + Tailwind CSS 4, deployed on Cloudflare Pages with a Cloudflare Worker backend for AI image generation.
+Website for All Things Flooring & Tile in Eastman, GA: cabinets first, then floors, tile and remodels. Astro (static) + Preact islands + Tailwind CSS 4, deployed on Cloudflare Pages with a Cloudflare Worker backend for the room visualizer.
 
 ## Tech Stack
 
@@ -15,47 +15,40 @@ Website for a flooring business in Eastman, GA. Astro (static) + Preact islands 
 
 ```
 src/
-  config.ts                      # Single source of truth for ALL site content, pricing, CTAs
-  env.d.ts                       # Astro + PWA type refs
-  pwa.ts                         # Service worker registration
-  layouts/
-    Base.astro                   # SEO, OG, geo meta, PWA manifest link, Header + slot + Footer + MobileNav
+  config.ts                      # Single source of truth: content, photos (PHOTOS), CTAs, reviews, cabinets, pricing
+  prefill.ts                     # sessionStorage key: Cabinet Planner -> /book message
+  layouts/Base.astro             # SEO, OG, geo meta, PWA manifest link, Header + slot + Footer + MobileNav
   components/
-    Header.astro                 # Desktop nav + mobile toggle, phone, booking CTA (vanilla JS for menu)
-    Footer.astro                 # Links, contact, copyright (desktop only)
-    MobileNav.astro              # Bottom nav bar (mobile only)
-    SchemaLocalBusiness.astro    # JSON-LD — HomeAndConstructionBusiness
-    Studio.tsx                   # Preact island — AI Visualizer + Cost Calculator
-    SqFtChallenge.tsx            # Preact island — sq ft practice game on Resources page
-    BookingForm.tsx              # Preact island — /book intake form + slot picker (Cerul-backed)
+    Header.astro / Footer.astro / MobileNav.astro   # nav from CONFIG.nav / footer.links / mobileNav
+    SchemaLocalBusiness.astro    # JSON-LD HomeAndConstructionBusiness (services from CONFIG.seo, no opening hours)
+    FAQ.astro                    # FAQ list + FAQPage JSON-LD
+    Suppliers.astro              # Supplier logo bar (landing + /book)
+    PhotoGrid.astro              # Masonry grid of real job photos
+    EstimateCta.astro            # "Set up an estimate" closing block
+    Studio.tsx                   # island: room visualizer + flooring cost calculator (/studio)
+    CabinetPlanner.tsx           # island: cabinet planner (/cabinets, client:visible)
+    BookingForm.tsx              # island: /book quick-connect form (Cerul-backed)
+    SqFtChallenge.tsx            # island: sq ft game (/resources)
   pages/
-    index.astro                  # Landing: hero, studio cards, projects, testimonials, suppliers, QR, showroom
-    studio.astro                 # Mounts <Studio client:load />
-    about.astro                  # Team bios (Ron, Jamie, Landin, Gavin), quote banner
-    community.astro              # Giving back, events, Facebook group connect
-    resources.astro              # Newsletter iframe, sq ft article, <SqFtChallenge client:visible />, YouTube
-    partners.astro               # Materials + installation partnerships, supplier bar
-    newsletter.astro             # Newsletter signup iframe
-    book.astro                   # Mounts <BookingForm client:load /> — replaces old Google Calendar link
-  styles/
-    global.css                   # Tailwind import + @theme CSS vars (warm/stone palette)
-  assets/                        # Legacy local images (most site imagery lives on R2)
-public/
-  favicon.svg                    # Brown AT monogram
-  apple-touch-icon.png, pwa-192.png, pwa-512.png   # PWA icons
-worker/
-  src/index.js                   # Cloudflare Worker — /generate and /health endpoints
-  wrangler.toml                  # Worker config (R2 binding, vars)
-astro.config.ts                  # Integrations: preact, sitemap, astro-icon, compress, @vite-pwa/astro, tailwindcss
-tsconfig.json                    # Strict, Preact JSX runtime, react/react-dom aliased to preact/compat
+    index.astro                  # Hero rotating gallery, what we do, halfway/finished, reviews, suppliers, app, FAQ, CTA
+    cabinets.astro               # Cabinet gallery by room + Cabinet Planner
+    custom.astro                 # Custom work (barrel table), stairs, built-ins
+    book.astro                   # Set up an estimate (BookingForm) + supplier bar
+    studio.astro, about.astro, resources.astro
+public/_redirects                # /newsletter /community /partners -> / (301), pages removed 2026-11
+worker/                          # Room visualizer worker. Do not touch from site work.
 ```
 
 ## Key Architecture Decisions
 
 - **Config-driven:** Everything flows from `src/config.ts` — business info, CTAs, nav, pricing, testimonials, suppliers, team, studio worker URL. Edit config, not components.
 - **Static output, no CF adapter:** `astro build` emits a plain `dist/` of HTML + assets. No `@astrojs/cloudflare` adapter — adding it splits output and breaks CF Pages routing.
-- **Interactivity via islands only:** The marketing site is static. Three Preact islands: `Studio.tsx` (`client:load` — AI visualizer + calculator), `SqFtChallenge.tsx` (`client:visible` — sq ft game), and `BookingForm.tsx` (`client:load` — booking intake + slot picker on `/book`). Landing carousels and mobile menu use vanilla `<script>` blocks in Astro files.
-- **Booking CTA:** Primary CTAs point to internal `/book` page (`CONFIG.booking`) — a Preact island wired to Cerul's stateless 2-endpoint backend at `hetzner.cerul.org`. Replaced the old Google Calendar deep link 2026-05-16. Full recipe + contract spec in `docs/adding-booking.md` (reusable template for porting the same flow to other contractor sites). Phone number is secondary; Header shows both.
+- **Interactivity via islands only:** Four Preact islands: `Studio.tsx`, `CabinetPlanner.tsx`, `BookingForm.tsx`, `SqFtChallenge.tsx`. Landing hero gallery, review carousel and mobile menu are vanilla `<script>` blocks in Astro files.
+- **Photos:** real job photos only, on R2 at `https://social.cerul.org/all-thing/site-images/work/<name>.webp` (bucket `cerul-social-media`, prefix `all-thing/site-images/`). Listed once in `PHOTOS` in config with alt + pixel size. No stock, no generated images. Mid-job shots are labelled "Halfway" / "Finished", never "Before" / "After".
+- **Showroom is closed (since 2026-08-31).** No showroom, walk-in, "stop by" or store-hours copy anywhere (pages, FAQ, team bios, JSON-LD, manifest). Phone and the site are the only ways in. Street address stays in footer + JSON-LD only.
+- **Copy rules:** no em-dashes, never "AI" in customer-facing copy, reviews in `testimonials` are real Google reviews, verbatim. No invented prices, towns or counts.
+- **Cabinet prices:** `CONFIG.cabinets.pricing` is `null` until Ron sends numbers (typed `CabinetPricing`: per-linear-foot low/high by grade + countertop adders). While null the planner shows no dollar figures.
+- **/book is a quick-connect, not a booking.** CTAs say "Set up an estimate", never "Book". Visitor sends what they need + a preferred day/time; Ron or Jamie call or text to settle it. The server decides `request_received` vs live slots; slot step reads "Times that could work". Island talks to Cerul's 2-endpoint backend at `hetzner.cerul.org` (contract in `docs/adding-booking.md`, do not change it from the site). The planner prefills the message via sessionStorage (`src/prefill.ts`) or `?message=`.
 - **Worker AI pipeline:** Upload room + flooring images → R2 storage → Gemini analyzes both → Gemini edits room with new floor → saves to R2 → returns base64. Falls back to OpenAI if Gemini fails.
 - **Worker security:** Origin allowlist (`allthingsflooringntile.com`, `www.` variant, `*.all-things.pages.dev` previews, localhost dev ports) enforced on `/generate`. `/health` is open. Rate limited to 10 req / 60s / IP via Cloudflare's native `[[unsafe.bindings]] type = "ratelimit"` binding.
 
@@ -86,22 +79,6 @@ The worker requires these secrets (set via `wrangler secret put`):
 
 ## Current TODO
 
-### SEO — in-flight
-- [x] Google: all 7 pages indexed
-- [x] Bing: sitemap submitted at `https://allthingsflooringntile.com/sitemap-index.xml`
-- [x] H1 tags present on all 7 pages (`/studio` fixed 2026-04-23 — Bing flagged it as the only page missing an H1)
-- [ ] Expand `areaServed` in `src/components/SchemaLocalBusiness.astro` to cover neighbor towns + counties (McRae-Helena, Dublin, Cochran, Hawkinsville, Chauncey, Telfair, Laurens, Pulaski, Wilcox)
-- [ ] Per-town landing pages (same town list) — config-driven so the pattern is reusable as a template for other small-town trades
-- [ ] FAQ block on `/studio` (thin-content gap on flagship tool page)
-
-### Blocked on GBP
-**Waiting on Google Business Profile name-collision resolution** (Matt Oxley owns the "& Tile" listing — see memory). Do NOT start directory submissions until GBP name is locked — NAP (Name/Address/Phone) inconsistency across citations actively hurts local rank. Once unblocked:
-- [ ] Video verification — single continuous take, showroom + shop walkthrough, sign visible, name+address spoken. Team has TikTok video chops.
-- [ ] Batch-submit listings in one pass: Bing Places, Apple Maps, Facebook Business, Yelp, BBB, Angi, HomeAdvisor, Nextdoor, Dodge County Chamber
-- [ ] Supplier "find a dealer" backlink outreach (Shaw, Mohawk, Daltile, COREtec)
-- [ ] Embed Google Reviews + request review outreach (only after name is locked)
-
-### Content — replace placeholders
-- [ ] Social links — all four entries in `config.ts` `socials[]` still use `href: '#'` (Facebook, Instagram, TikTok, YouTube)
-- [ ] Before/after project images — `config.ts` `landing.projects[]` uses color/pattern placeholders; swap in real photos once available
-- [ ] Community events — `config.ts` `community.events[]` are plausible placeholders; replace with real sponsorships/events as they're confirmed
+- [ ] `CONFIG.cabinets.pricing`: waiting on Ron's per-linear-foot numbers by grade + countertop adders.
+- [ ] Expand `areaServed` / per-town landing pages (config-driven). See `docs/TODO.md`.
+- [ ] GBP name collision (blocked): directory listings wait until the name is locked. See `docs/TODO.md`.

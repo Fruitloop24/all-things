@@ -44,6 +44,8 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,jpg,webp,woff2}'],
+        // /book?message=... (Cabinet Planner fallback) must still match the precached /book page.
+        ignoreURLParametersMatching: [/^utm_/, /^fbclid$/, /^message$/],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,

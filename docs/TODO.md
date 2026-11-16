@@ -4,7 +4,7 @@ Last updated: 2026-05-16
 
 ## Overall status
 
-**Site is live, indexed, and structurally sound.** Google has all 7 pages indexed, Bing has the sitemap, structured data is rich, security headers are in place, all H1s present, alt text on every image. The fundamentals are done. What's left is local-SEO depth (town pages, Service schema), share polish (OG image), and one infrastructure fix (R2 custom domain).
+**Site is live, indexed, and structurally sound.** Google indexed the original 7 pages (3 removed 2026-11, now 301 to `/`), Bing has the sitemap, structured data is rich, security headers are in place, all H1s present, alt text on every image. The fundamentals are done. What's left is local-SEO depth (town pages, Service schema), share polish (OG image), and one infrastructure fix (R2 custom domain).
 
 ---
 
@@ -50,33 +50,22 @@ Last updated: 2026-05-16
 
 ### 2. Per-town landing pages (not blocked by GBP)
 - [ ] Build `src/pages/service-area/[town].astro` dynamic route with town list in `src/config.ts` (Eastman, McRae-Helena, Cochran, Hawkinsville, Chauncey, Dublin, Rhine, Milan, Cadwell, Abbeville).
-- [ ] Each page: unique H1, town-specific copy paragraphs, list of services + local landmarks/neighborhoods, `Service` JSON-LD with `areaServed: { "@type": "City", name: town }`, contextual links to /studio and /partners.
+- [ ] Each page: unique H1, town-specific copy paragraphs, list of services + local landmarks/neighborhoods, `Service` JSON-LD with `areaServed: { "@type": "City", name: town }`, contextual links to /cabinets, /studio and /book.
 - [ ] `src/pages/service-area/index.astro` hub that links to all towns.
 - [ ] Add to sitemap (auto via @astrojs/sitemap).
 - [ ] Internal-link from home page footer or a "We serve" strip.
 - Why: biggest organic-rank lever for a local trade. GBP block is for off-site directories (NAP consistency); on-site town pages are independent of that and reusable as a template for other small-town clients.
 
 ### 3. Service schema + BreadcrumbList
-- [ ] One `Service` JSON-LD entity per offering: Hardwood, LVP, Tile, Carpet, Refinishing, VCT, Tool Rental. Live on `/` (or split per page if expanded).
+- [x] Services listed in JSON-LD `hasOfferCatalog` from `CONFIG.seo.services` (2026-11). Per-page `Service` entities still open.
 - [ ] `src/components/SchemaBreadcrumb.astro` component, accept `items` prop, drop on every non-home page.
 - Why: rich-result eligibility, SERP shows breadcrumb path instead of raw URL.
 
-### 4. Image performance
-- [ ] Set explicit `width` and `height` on every `<img>` in `src/pages/index.astro`, `src/pages/about.astro`, `src/pages/partners.astro`. Eliminates CLS — Core Web Vitals ranking factor.
-- [ ] Re-upload project photos to R2 as WebP (currently PNG, ~8–9 MB each — that's the LCP killer):
-  - `carpet-hardwood.png` → `.webp`
-  - `laminate-ceramic.png` → `.webp`
-  - `bathroom-lam-tile.png` → `.webp`
-  - `dining-carpet-hard.png` → `.webp`
-  - `bed-carp-hardlam.png` → `.webp`
-  - Then update `src/config.ts` `images.projects[].src` extensions.
-- Why: ~42 MB of project photos right now, even on a fast connection that's a slow LCP. WebP at 70–80% quality usually drops to <500 KB each with no visible quality loss.
-
-### 5. Internal linking
-- [ ] Add 3–5 contextual in-body links from `/` to deeper pages (Resources, Community, About). Currently only `/studio` is linked from the body.
+### 4. Internal linking
+- [ ] Add 3–5 contextual in-body links from `/` to Resources and About. (`/cabinets`, `/custom`, `/studio`, `/book` are linked from the body since 2026-11.)
 - Why: crawlers weight in-body anchor text more than nav repetition. Distributes page authority better.
 
-### 6. Polish
+### 5. Polish
 - [ ] Drop a 32×32 `favicon.ico` at `public/favicon.ico`. Some bots/old crawlers fetch `.ico` and 404.
 - [ ] Consider `twitter:site` once a handle exists.
 
@@ -88,18 +77,10 @@ Per memory: Matt Oxley owns the "& Tile" GBP listing; team operating under "N Ti
 
 Once unblocked (single batch, in this order):
 
-- [ ] GBP video verification (single continuous take, showroom + shop walkthrough, sign visible, name + address spoken). Team has TikTok video chops — easy.
+- [ ] GBP video verification (single continuous take, shop walkthrough, sign visible, name + address spoken). Team has TikTok video chops — easy.
 - [ ] Bing Places, Apple Maps, Facebook Business, Yelp, BBB, Angi, HomeAdvisor, Nextdoor, Dodge County Chamber.
 - [ ] Supplier "find a dealer" backlinks (Shaw, Mohawk, Daltile, COREtec).
 - [ ] Embed Google Reviews + reach out for review collection.
-
----
-
-## Content — placeholders to replace
-
-- [ ] Project before/after images on `/` — `src/config.ts` `landing.beforeAfterProjects[]` uses color/pattern placeholders. Swap to real photos when available.
-- [ ] Community events — `src/config.ts` `community.events[]` are plausible placeholders. Replace with confirmed sponsorships.
-- [ ] `facebookGroup` in `src/config.ts` (line 185) still `'#'` — replace with real group URL once created.
 
 ---
 
