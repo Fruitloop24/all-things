@@ -35,7 +35,23 @@ export interface CabinetPricing {
   countertopPerSqFt: Partial<Record<'butcher' | 'stone' | 'laminate', PriceRange>>
   /** Square feet of countertop assumed per linear foot of wall. */
   countertopSqFtPerLinearFoot: number
-  /** Plain-words disclaimer, shown next to every dollar figure. */
+  /** One short disclaimer line, shown once per calculator. */
+  disclaimer: string
+}
+
+/** General ranges for the Build and Custom planners. unit: sqft / lf (linear ft) / flat / none (no number). */
+export interface RangeItem {
+  key: string
+  label: string
+  unit: 'sqft' | 'lf' | 'flat' | 'none'
+  range?: PriceRange
+  /** Suffix for flat ranges in the table, e.g. "per bath". */
+  per?: string
+}
+export interface RangePricing {
+  items: RangeItem[]
+  /** Ballparks round to this many dollars. */
+  roundTo: number
   disclaimer: string
 }
 
@@ -45,7 +61,7 @@ export interface PlannerField {
   label: string
   /** Label used in the summary sent to /book (defaults to label). */
   short?: string
-  type: 'chips' | 'text'
+  type: 'chips' | 'text' | 'number'
   options?: { key: string; label: string }[]
   placeholder?: string
   hint?: string
@@ -55,13 +71,18 @@ export interface SimplePlannerConfig {
   headline: string
   subheadline: string
   summaryTitle: string
-  note?: string
   fields: PlannerField[]
+  /** Chips field whose option keys match pricing.items keys, and the number field used as the size. */
+  priceField?: string
+  sizeField?: string
+  /** Size field label by unit. Hidden for flat / none items. */
+  sizeLabels?: { sqft: string; lf: string }
+  pricing?: RangePricing | null
 }
 
 const photo = (name: string, alt: string, w: number, h: number): Photo => ({ src: `${WORK}/${name}.webp`, alt, w, h })
 
-// Every photo below is a real job (or shop) photo, except barndoExample (owner-approved example, captioned as such).
+// Every photo below is a real job (or shop) photo, except barndoExample (owner-approved example image).
 export const PHOTOS = {
   boy: { src: `${R2}/hero.jpg`, alt: 'A little boy standing between two displays of floor sample boards', w: 526, h: 701 },
   whiteKitchen: photo('cabinets-white-kitchen-wood-island', 'White kitchen cabinets with a stained wood island and pendant lights', 1600, 1200),
@@ -91,7 +112,7 @@ export const PHOTOS = {
   barrelTableShop: photo('custom-barrel-table-shop', 'The whiskey barrel table standing in the shop', 880, 1640),
   epoxyTop: photo('custom-epoxy-top', 'Round poured epoxy table top with wood and antlers set in it', 880, 1640),
   epoxyTopAntlers: photo('custom-epoxy-top-antlers', 'Close-up of the epoxy top with antlers and wood set in it', 720, 1280),
-  // Owner-approved EXAMPLE image (not one of their jobs). Always captioned as an example. Swap for a real barndominium photo when Ron sends one.
+  // Owner-approved EXAMPLE image (not one of their jobs); alt text says "Example". Swap for a real barndominium photo when Ron sends one.
   barndoExample: { src: `${WORK}/build-barndominium-example.webp`, alt: 'Example barndominium interior with exposed beams, a wood floor and a stone fireplace', w: 1072, h: 1072 },
   farmhouse: photo('build-farmhouse-exterior', 'Finished white farmhouse new build with a covered porch and a dark shingle roof', 1584, 993),
 } satisfies Record<string, Photo>
@@ -194,9 +215,8 @@ export const CONFIG = {
     { to: '/cabinets', label: 'Cabinets' },
     { to: '/build', label: 'Build & Remodel', short: 'Build' },
     { to: '/custom', label: 'Custom Work', short: 'Custom' },
-    { to: '/studio', label: 'Design Studio', short: 'Studio' },
+    { to: '/studio', label: 'Flooring & Design', short: 'Flooring' },
     { to: '/about', label: 'About Us', short: 'About' },
-    { to: '/resources', label: 'Resources' },
   ] as { to: string; label: string; short?: string }[],
   mobileNav: [
     { to: '/', label: 'Home', icon: 'home' },
@@ -215,7 +235,8 @@ export const CONFIG = {
       { label: 'Floors for the whole family', word: 'floor', photos: [PHOTOS.boy] },
       { label: 'We handle cabinets', word: 'kitchen', photos: [PHOTOS.whiteKitchen, PHOTOS.blueIsland, PHOTOS.laundry, PHOTOS.fireplace] },
       { label: 'Tile showers', word: 'bathroom', photos: [PHOTOS.showerSubway, PHOTOS.showerBench, PHOTOS.showerNiche, PHOTOS.showerWalkIn] },
-      { label: 'Build or remodel', word: 'build', photos: [PHOTOS.stairs, PHOTOS.hallStairs, PHOTOS.masterBath, PHOTOS.bonusRoom] },
+      // layout 'lead': first photo is the large top tile, the rest sit in a row under it.
+      { label: 'Build or remodel', sub: 'From whole homes and barndominiums to a set of stairs. No job too big.', word: 'build', layout: 'lead', photos: [PHOTOS.farmhouse, PHOTOS.stairs, PHOTOS.masterBath, PHOTOS.hallStairs] },
     ],
   },
 
@@ -228,7 +249,7 @@ export const CONFIG = {
       { title: 'Cabinets', desc: 'Kitchens, baths, laundry rooms, pantries, closets and built-ins. Get a ballpark online.', photo: PHOTOS.whiteKitchen, position: 'center 50%', href: '/cabinets' },
       { title: 'Build & Remodel', desc: 'New houses and barndominium kits built start to finish, plus additions, porches and remodels.', photo: PHOTOS.farmhouse, position: 'center 60%', href: '/build' },
       { title: 'Custom Work', desc: 'Tables, bars, built-ins and one-off pieces. If you can picture it, we can build it.', photo: PHOTOS.barrelTableShop, position: 'center 62%', href: '/custom' },
-      { title: 'Floors', desc: 'Hardwood, vinyl plank, tile and carpet. See a new floor in a photo of your room.', photo: PHOTOS.bonusRoom, position: 'center 70%', href: '/studio' },
+      { title: 'Flooring & Design', desc: 'Hardwood, vinyl plank, tile and carpet. See a new floor in a photo of your room.', photo: PHOTOS.bonusRoom, position: 'center 70%', href: '/studio' },
     ],
   },
 
@@ -295,6 +316,24 @@ export const CONFIG = {
         { key: 'planning', label: 'Just planning' },
       ],
     },
+    faqs: [
+      {
+        q: 'How much do new cabinets cost?',
+        a: 'Ballpark, installed, per foot of wall: ready-made cabinets about $150 to $300, semi-custom about $250 to $650, and custom built about $500 to $1,200. Countertops add about $25 to $50 per square foot for laminate, $40 to $100 for butcher block, and $60 to $150 for stone or quartz.',
+      },
+      {
+        q: 'What rooms do you do cabinets for?',
+        a: 'Kitchens, baths, laundry rooms, pantries, closets, built-ins around fireplaces, and wet bars, including one on a covered porch.',
+      },
+      {
+        q: 'Can you do the countertops, backsplash and floors too?',
+        a: 'Yes. One crew handles the cabinets, countertops, backsplash, tile and flooring, so the whole room comes together.',
+      },
+      {
+        q: 'What areas do you serve?',
+        a: 'Eastman, Dodge County, McRae-Helena, Cochran, Telfair County, and surrounding Middle Georgia communities. Call us at (478) 298-6012 if you are not sure.',
+      },
+    ],
     // GENERAL typical installed ranges, NOT Ron's own price list. Replace with Ron's numbers when he sends them.
     // Set to null to hide every dollar figure in the planner.
     pricing: {
@@ -309,7 +348,7 @@ export const CONFIG = {
         stone: { low: 60, high: 150 },
       },
       countertopSqFtPerLinearFoot: 2,
-      disclaimer: 'This is a ballpark from typical installed prices, not a quote. The real number comes after we measure.',
+      disclaimer: 'Ballpark from typical installed prices, not a quote.',
     } as CabinetPricing | null,
   },
 
@@ -324,18 +363,22 @@ export const CONFIG = {
     planner: {
       eyebrow: 'Custom Planner',
       headline: 'Tell us what you want built',
-      subheadline: 'A few quick picks so we know where to start.',
+      subheadline: 'Pick the piece for a ballpark, then send it over.',
       summaryTitle: 'Custom piece',
+      priceField: 'what',
+      sizeField: 'size',
+      sizeLabels: { sqft: 'Rough square feet of top', lf: 'Rough length in feet' },
       fields: [
         { key: 'what', label: 'What is it?', short: 'Piece', type: 'chips', options: [
-          { key: 'table', label: 'Table' },
+          { key: 'barrel', label: 'Barrel table' },
+          { key: 'epoxy', label: 'Epoxy or live-edge table' },
           { key: 'bar', label: 'Bar' },
-          { key: 'builtin', label: 'Built-in' },
+          { key: 'builtin', label: 'Built-ins' },
           { key: 'shelving', label: 'Shelving' },
           { key: 'countertop', label: 'Countertop' },
           { key: 'other', label: 'Other' },
         ] },
-        { key: 'size', label: 'Rough size', type: 'text', placeholder: 'About 4 ft round, 30 in tall', hint: 'A guess is fine.' },
+        { key: 'size', label: 'Rough size', short: 'Size', type: 'number', placeholder: '10', hint: 'A guess is fine.' },
         { key: 'finish', label: 'Wood or finish, if you know', short: 'Wood / finish', type: 'text', placeholder: 'Oak with an epoxy top' },
         { key: 'timing', label: 'Timing', type: 'chips', options: [
           { key: 'asap', label: 'ASAP' },
@@ -343,7 +386,40 @@ export const CONFIG = {
           { key: 'planning', label: 'Just planning' },
         ] },
       ],
+      // GENERAL typical ranges, NOT Ron's own price list. Replace with Ron's numbers when he sends them.
+      // Countertop reuses the cabinet countertop per-sq-ft spread (laminate low to stone high).
+      pricing: {
+        items: [
+          { key: 'barrel', label: 'Barrel table', unit: 'flat', range: { low: 800, high: 2500 } },
+          { key: 'epoxy', label: 'Epoxy or live-edge table', unit: 'flat', range: { low: 1500, high: 6000 } },
+          { key: 'bar', label: 'Bar', unit: 'flat', range: { low: 2000, high: 10000 } },
+          { key: 'builtin', label: 'Built-ins', unit: 'lf', range: { low: 300, high: 1200 } },
+          { key: 'shelving', label: 'Shelving', unit: 'lf', range: { low: 50, high: 200 } },
+          { key: 'countertop', label: 'Countertop', unit: 'sqft', range: { low: 25, high: 150 } },
+          { key: 'other', label: 'Something else', unit: 'none' },
+        ],
+        roundTo: 100,
+        disclaimer: 'Ballpark from typical prices, not a quote.',
+      },
     } satisfies SimplePlannerConfig,
+    faqs: [
+      {
+        q: 'What kind of custom pieces do you build?',
+        a: 'Tables, including barrel tables and epoxy or live-edge tops, bars, built-ins, shelving and countertops. If you can picture it, we can build it. Tell us what you have in mind.',
+      },
+      {
+        q: 'How much does a custom table cost?',
+        a: 'Ballpark: a barrel table runs about $800 to $2,500, and an epoxy or live-edge table about $1,500 to $6,000, depending on size, wood and finish.',
+      },
+      {
+        q: 'How much do built-ins, shelving or a bar cost?',
+        a: 'Ballpark: built-ins run about $300 to $1,200 per linear foot, shelving about $50 to $200 per linear foot, and a bar about $2,000 to $10,000.',
+      },
+      {
+        q: 'What areas do you serve?',
+        a: 'Eastman, Dodge County, McRae-Helena, Cochran, Telfair County, and surrounding Middle Georgia communities. Call us at (478) 298-6012 if you are not sure.',
+      },
+    ],
     feature: {
       title: 'Whiskey barrel table',
       desc: 'A whiskey barrel turned into a table, with a cabinet door set into the side and a poured epoxy top with wood and antlers set in it.',
@@ -366,21 +442,28 @@ export const CONFIG = {
     description: 'New house builds, barndominium kits, additions, covered porches and remodels in Eastman, GA and Dodge County. Tell us what you are planning.',
     eyebrow: 'Build & Remodel',
     headline: 'Build and Remodel',
-    intro: 'Ron\'s crew builds the whole thing. A barndominium arrives as a kit, a house starts as a set of plans, and the same crew takes it from the slab to the cabinets, floors and tile. One crew, one phone number. We also do additions, covered porches and whole-room remodels. Every build is priced after we talk it through.',
+    intro: 'From whole homes and barndominiums to a set of stairs. No job too big. A barndominium arrives as a kit, a house starts as a set of plans, and the same crew builds it from the slab to the cabinets, floors and tile. One crew, one phone number.',
     banner: { photo: PHOTOS.farmhouse, position: 'center 60%' },
     planner: {
       eyebrow: 'Build Planner',
       headline: 'Tell us what you are planning',
-      subheadline: 'A few quick picks so we know where to start.',
+      subheadline: 'Pick the job for a ballpark, then send it over.',
       summaryTitle: 'Build or remodel',
+      priceField: 'project',
+      sizeField: 'sqft',
+      sizeLabels: { sqft: 'Rough square feet', lf: 'Rough length in feet' },
       fields: [
         { key: 'project', label: 'What are you planning?', short: 'Project', type: 'chips', options: [
           { key: 'house', label: 'New house' },
           { key: 'barndo', label: 'Barndominium kit' },
-          { key: 'addition', label: 'Addition or porch' },
-          { key: 'remodel', label: 'Remodel' },
+          { key: 'addition', label: 'Addition' },
+          { key: 'porch', label: 'Covered porch' },
+          { key: 'bath', label: 'Bathroom remodel' },
+          { key: 'kitchen', label: 'Kitchen remodel' },
+          { key: 'stairs', label: 'Stairs' },
+          { key: 'remodel', label: 'Other remodel' },
         ] },
-        { key: 'sqft', label: 'Rough square feet', type: 'text', placeholder: '1,800', hint: 'A guess is fine.' },
+        { key: 'sqft', label: 'Rough square feet', short: 'Size', type: 'number', placeholder: '1800', hint: 'A guess is fine.' },
         { key: 'land', label: 'Do you have land or plans yet?', short: 'Land / plans', type: 'chips', options: [
           { key: 'both', label: 'Land and plans' },
           { key: 'land', label: 'Land, no plans' },
@@ -393,7 +476,44 @@ export const CONFIG = {
           { key: 'planning', label: 'Just planning' },
         ] },
       ],
+      // GENERAL typical ranges (per sq ft finished unless flat), NOT Ron's own price list. Replace with Ron's numbers.
+      pricing: {
+        items: [
+          { key: 'house', label: 'New house', unit: 'sqft', range: { low: 150, high: 250 } },
+          { key: 'barndo', label: 'Barndominium kit, built out', unit: 'sqft', range: { low: 90, high: 160 } },
+          { key: 'addition', label: 'Addition', unit: 'sqft', range: { low: 120, high: 250 } },
+          { key: 'porch', label: 'Covered porch', unit: 'sqft', range: { low: 40, high: 120 } },
+          { key: 'bath', label: 'Bathroom remodel', unit: 'flat', range: { low: 8000, high: 30000 }, per: 'per bath' },
+          { key: 'kitchen', label: 'Kitchen remodel', unit: 'flat', range: { low: 15000, high: 60000 } },
+          { key: 'stairs', label: 'Staircase', unit: 'flat', range: { low: 2000, high: 8000 } },
+          { key: 'remodel', label: 'Other remodel', unit: 'none' },
+        ],
+        roundTo: 1000,
+        disclaimer: 'Ballpark from typical prices, not a quote.',
+      },
     } satisfies SimplePlannerConfig,
+    faqs: [
+      {
+        q: 'Do you build barndominiums?',
+        a: 'Yes. The barndominium arrives as a kit and our crew builds it start to finish, from the slab to the cabinets, floors and tile. One crew, one phone number.',
+      },
+      {
+        q: 'What does a new house or barndominium cost?',
+        a: 'Ballpark, finished: a new house runs about $150 to $250 per square foot, and a barndominium kit built out about $90 to $160 per square foot. Use the planner above for a number on your size.',
+      },
+      {
+        q: 'Do you do additions and covered porches?',
+        a: 'Yes. Additions run about $120 to $250 per square foot and covered porches about $40 to $120 per square foot, ballpark.',
+      },
+      {
+        q: 'What does a bathroom or kitchen remodel cost?',
+        a: 'Ballpark: a bathroom remodel runs about $8,000 to $30,000 per bath, a kitchen remodel about $15,000 to $60,000, and a staircase about $2,000 to $8,000.',
+      },
+      {
+        q: 'What areas do you serve?',
+        a: 'Eastman, Dodge County, McRae-Helena, Cochran, Telfair County, and surrounding Middle Georgia communities. Call us at (478) 298-6012 if you are not sure.',
+      },
+    ],
     sections: {
       newBuilds: {
         title: 'New builds',
@@ -519,7 +639,7 @@ export const CONFIG = {
     },
     {
       q: 'How much do new cabinets cost?',
-      a: 'It depends on the room, how much wall you are covering, the cabinet grade and the countertop. The Cabinet Planner on our Cabinets page gives you a ballpark from typical installed prices. That is not a quote: the real number comes after we measure.',
+      a: 'Ballpark, installed: about $150 to $300 per foot of wall for ready-made, $250 to $650 for semi-custom, and $500 to $1,200 for custom built, plus the countertop. The Cabinet Planner on our Cabinets page puts a number on your room.',
     },
     {
       q: 'Can you do the countertops, tile and floors too?',
@@ -528,6 +648,10 @@ export const CONFIG = {
     {
       q: 'Do you do remodels and builds?',
       a: 'Yes. We build new houses and barndominium kits start to finish: the kit or the plans come in, and the same crew takes it from the slab to the cabinets, floors and tile. One crew, one phone number. We also do additions, covered porches, bathroom remodels, tile showers and stairs. See the Build and Remodel page.',
+    },
+    {
+      q: 'Do you build custom pieces?',
+      a: 'Yes. Barrel tables, epoxy and live-edge tables, bars, built-ins, shelving and countertops. If you can picture it, we can build it. See the Custom Work page for a ballpark.',
     },
     {
       q: 'What areas do you serve?',
@@ -539,7 +663,7 @@ export const CONFIG = {
     },
     {
       q: 'Can I see what new floors will look like in my room before I buy?',
-      a: 'Yes. Our free Room Visualizer lets you upload a photo of your room, pick a floor, and see the floor in your room. Try it on our Design Studio page.',
+      a: 'Yes. Our free Room Visualizer lets you upload a photo of your room, pick a floor, and see the floor in your room. Try it on our Flooring & Design page.',
     },
     {
       q: 'How long does flooring installation usually take?',
@@ -583,15 +707,6 @@ export const CONFIG = {
     },
   ],
 
-  // ─── RESOURCES PAGE ───
-  resources: {
-    youtube: [
-      { id: 'p0WgkJG-B_Y', title: 'How to Calculate Square Footage', channel: 'YouTube' },
-      { id: 'gQKhj-VmiHk', title: 'Odd-Shaped Rooms: Measuring Sq Ft', channel: 'YouTube' },
-      { id: 'WOjKCK16FBE', title: 'Types of Flooring Explained', channel: 'YouTube' },
-    ],
-  },
-
   // ─── FOOTER ───
   footer: {
     tagline: 'Cabinets, floors, tile and remodels for Eastman and Dodge County. Call, text, or set up an estimate online.',
@@ -600,9 +715,8 @@ export const CONFIG = {
       { label: 'Cabinets', to: '/cabinets' },
       { label: 'Build & Remodel', to: '/build' },
       { label: 'Custom Work', to: '/custom' },
-      { label: 'Design Studio', to: '/studio' },
+      { label: 'Flooring & Design', to: '/studio' },
       { label: 'About Us', to: '/about' },
-      { label: 'Resources', to: '/resources' },
       { label: 'Set up an estimate', to: '/book' },
     ],
   },

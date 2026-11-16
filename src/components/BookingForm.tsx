@@ -109,8 +109,11 @@ export default function BookingForm() {
     }
   }, [])
 
-  const update = (k: keyof CustomerInfo) => (e: Event) =>
-    setInfo({ ...info, [k]: (e.target as HTMLInputElement).value })
+  // Functional update: browser autofill fires several input events in one tick.
+  const update = (k: keyof CustomerInfo) => (e: Event) => {
+    const value = (e.target as HTMLInputElement).value
+    setInfo((prev) => ({ ...prev, [k]: value }))
+  }
 
   // Server side-effect: when /request returns handoff:true (after 6 excluded
   // slots), it already created the 📞 CALL event + fired Web Push on the
@@ -126,7 +129,8 @@ export default function BookingForm() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         ...customerPayload(info),
-        preferred_start_iso: preferredStartISO(info.preferredDate, info.preferredWindow),
+        // No day picked = no preferred_start_iso; the server handles that in request mode.
+        ...(info.preferredDate ? { preferred_start_iso: preferredStartISO(info.preferredDate, info.preferredWindow) } : {}),
         exclude_slot_ids: excludeSlotIds,
       }),
     })
@@ -148,10 +152,8 @@ export default function BookingForm() {
     e.preventDefault()
     setError('')
     if (!info.name.trim()) return setError('Please enter your name.')
-    if (!info.phone.trim()) return setError('Please enter a phone number so we can call or text you.')
-    if (!info.email.trim()) return setError('Please enter an email.')
-    if (!info.address.trim()) return setError('Please enter the address where the work will happen.')
-    if (!info.preferredDate) return setError('Please pick a day that would suit you.')
+    // Name plus a phone OR an email. Everything else is optional.
+    if (!info.phone.trim() && !info.email.trim()) return setError('Please leave a phone number or an email so we can reach you.')
 
     setLoading(true)
     setExcludeIds([])
@@ -249,8 +251,8 @@ export default function BookingForm() {
         <div class="bg-warm-50 rounded-xl p-5 text-sm text-stone-600 mb-6 text-left">
           <div class="font-semibold text-stone-900 mb-2">What happens next</div>
           <ul class="space-y-1.5">
-            <li>&middot; You'll get a confirmation email shortly.</li>
-            <li>&middot; We'll come to {info.address} and measure.</li>
+            {info.email && <li>&middot; You'll get a confirmation email shortly.</li>}
+            <li>&middot; We'll come {info.address ? <>to {info.address} </> : 'out '}and measure.</li>
             <li>&middot; You'll get a written, itemized estimate. No pressure to decide on the spot.</li>
           </ul>
         </div>
@@ -312,7 +314,7 @@ export default function BookingForm() {
       <div class="bg-white rounded-2xl border border-warm-100 p-6 md:p-8 shadow-sm">
         <div class="mb-5">
           <p class="text-warm-700 text-xs font-semibold tracking-widest uppercase mb-1">Step 2 of 2</p>
-          <h2 class="font-heading text-xl md:text-2xl font-bold text-stone-900">Times that could work, {info.name.split(' ')[0]}</h2>
+          <h2 class="font-heading text-2xl md:text-3xl font-bold text-stone-900">Times that could work, {info.name.split(' ')[0]}</h2>
           <p class="text-stone-500 text-sm mt-1">Tap the one that suits you best, or ask for other times.</p>
         </div>
 
@@ -381,41 +383,43 @@ export default function BookingForm() {
     >
       <div class="mb-1">
         <p class="text-warm-700 text-xs font-semibold tracking-widest uppercase mb-1">Free estimate request</p>
-        <h2 class="font-heading text-xl md:text-2xl font-bold text-stone-900">Tell us what you need</h2>
+        <h2 class="font-heading text-2xl md:text-3xl font-bold text-stone-900">Tell us what you need</h2>
         <p class="text-sm text-stone-500 mt-1.5">Nothing is booked yet. {RON} or {JAMIE} will call or text you to settle the time.</p>
       </div>
 
       <div>
         <label for="name" class="block text-sm font-semibold text-stone-700 mb-1.5">Your name <span class="text-warm-700">*</span></label>
         <input
-          id="name" type="text" required value={info.name} onInput={update('name')}
+          id="name" type="text" required autoComplete="name" value={info.name} onInput={update('name')}
           class="w-full px-4 py-2.5 border border-warm-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-warm-500 focus:border-warm-500 bg-white"
         />
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label for="phone" class="block text-sm font-semibold text-stone-700 mb-1.5">Phone <span class="text-warm-700">*</span></label>
+          <label for="phone" class="block text-sm font-semibold text-stone-700 mb-1.5">Phone</label>
           <input
-            id="phone" type="tel" required value={info.phone} onInput={update('phone')}
+            id="phone" type="tel" autoComplete="tel" value={info.phone} onInput={update('phone')}
             placeholder="(478) 555-0000"
             class="w-full px-4 py-2.5 border border-warm-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-warm-500 focus:border-warm-500 bg-white"
           />
         </div>
         <div>
-          <label for="email" class="block text-sm font-semibold text-stone-700 mb-1.5">Email <span class="text-warm-700">*</span></label>
+          <label for="email" class="block text-sm font-semibold text-stone-700 mb-1.5">Email</label>
           <input
-            id="email" type="email" required value={info.email} onInput={update('email')}
+            id="email" type="email" autoComplete="email" value={info.email} onInput={update('email')}
             placeholder="you@example.com"
             class="w-full px-4 py-2.5 border border-warm-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-warm-500 focus:border-warm-500 bg-white"
           />
         </div>
       </div>
 
+      <p class="text-xs text-stone-500 -mt-2">A phone number or an email is all we need.</p>
+
       <div>
-        <label for="address" class="block text-sm font-semibold text-stone-700 mb-1.5">Service address <span class="text-warm-700">*</span></label>
+        <label for="address" class="block text-sm font-semibold text-stone-700 mb-1.5">Service address <span class="text-stone-400 font-normal">(optional)</span></label>
         <input
-          id="address" type="text" required value={info.address} onInput={update('address')}
+          id="address" type="text" autoComplete="street-address" value={info.address} onInput={update('address')}
           placeholder="123 Main St, Eastman, GA"
           class="w-full px-4 py-2.5 border border-warm-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-warm-500 focus:border-warm-500 bg-white"
         />
@@ -423,16 +427,16 @@ export default function BookingForm() {
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label for="date" class="block text-sm font-semibold text-stone-700 mb-1.5">Day that would suit you <span class="text-warm-700">*</span></label>
+          <label for="date" class="block text-sm font-semibold text-stone-700 mb-1.5">Day that would suit you <span class="text-stone-400 font-normal">(optional)</span></label>
           <input
-            id="date" type="date" required value={info.preferredDate} onInput={update('preferredDate')}
+            id="date" type="date" value={info.preferredDate} onInput={update('preferredDate')}
             min={todayISO()}
             class="w-full px-4 py-2.5 border border-warm-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-warm-500 focus:border-warm-500 bg-white"
           />
-          <p class="text-xs text-stone-500 mt-1">Preferred, not a confirmed time. Estimate visits are {API.hoursLabel}.</p>
+          <p class="text-xs text-stone-500 mt-1">Estimate visits are {API.hoursLabel}.</p>
         </div>
         <div>
-          <label class="block text-sm font-semibold text-stone-700 mb-1.5">Preferred time of day</label>
+          <label class="block text-sm font-semibold text-stone-700 mb-1.5">Preferred time of day <span class="text-stone-400 font-normal">(optional)</span></label>
           <div class="grid grid-cols-3 gap-1.5 p-1 bg-warm-50 border border-warm-200 rounded-lg">
             {WINDOWS.map((w) => (
               <button

@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro'
 import PageBanner from '../components/PageBanner.astro'
 import PhotoGrid from '../components/PhotoGrid.astro'
 import EstimateCta from '../components/EstimateCta.astro'
+import FAQ from '../components/FAQ.astro'
 import SimplePlanner from '../components/planner/SimplePlanner'
 import { CONFIG } from '../config'
 
@@ -23,7 +24,7 @@ const review = CONFIG.testimonials.find((t) => t.name === b.review)
   <section class="py-14 md:py-20 bg-white border-t border-warm-100">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="max-w-2xl mb-8">
-        <h2 class="font-heading text-2xl md:text-3xl font-bold text-stone-900 mb-3">{newBuilds.title}</h2>
+        <h2 class="font-heading text-3xl md:text-4xl font-bold text-stone-900 mb-3">{newBuilds.title}</h2>
         <p class="text-stone-600 leading-relaxed">{newBuilds.desc}</p>
       </div>
       <PhotoGrid photos={newBuilds.photos} />
@@ -34,7 +35,7 @@ const review = CONFIG.testimonials.find((t) => t.name === b.review)
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
         <div>
-          <h2 class="font-heading text-2xl md:text-3xl font-bold text-stone-900 mb-3">{barndo.title}</h2>
+          <h2 class="font-heading text-3xl md:text-4xl font-bold text-stone-900 mb-3">{barndo.title}</h2>
           <p class="text-stone-600 leading-relaxed mb-5">{barndo.desc}</p>
           <a href={CONFIG.cta.primary.href} class="inline-flex items-center justify-center gap-2 bg-warm-700 hover:bg-warm-800 text-white px-6 py-3 rounded-xl font-semibold no-underline shadow-md transition-colors">
             {CONFIG.cta.primary.text}
@@ -51,7 +52,7 @@ const review = CONFIG.testimonials.find((t) => t.name === b.review)
   <section class="py-14 md:py-20 bg-white border-t border-warm-100">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="max-w-2xl mb-8">
-        <h2 class="font-heading text-2xl md:text-3xl font-bold text-stone-900 mb-3">{remodels.title}</h2>
+        <h2 class="font-heading text-3xl md:text-4xl font-bold text-stone-900 mb-3">{remodels.title}</h2>
         <p class="text-stone-600 leading-relaxed">{remodels.desc}</p>
       </div>
       <PhotoGrid photos={remodels.photos} />
@@ -81,6 +82,8 @@ const review = CONFIG.testimonials.find((t) => t.name === b.review)
       </section>
     )
   }
+
+  <FAQ faqs={CONFIG.build.faqs} headline="Build and Remodel Questions" />
 
   <EstimateCta headline={b.cta.headline} text={b.cta.text} />
 </Base>

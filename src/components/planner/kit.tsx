@@ -1,7 +1,8 @@
-// Shared bits for the planner islands (Cabinet, Custom, Build): option chips,
-// the summary box, and the hand-off of the summary to the /book form.
+// Shared bits for the planner islands (Cabinet, Custom, Build): option chips, money helpers,
+// the price table, the summary box, and the hand-off of the summary to the /book form.
 import type { ComponentChildren } from 'preact'
 import { CONFIG } from '../../config'
+import type { PriceRange } from '../../config'
 import { PREFILL_KEY } from './prefill'
 
 export type Option = { key: string; label: string }
@@ -14,6 +15,11 @@ export const labelOf = (opts: Option[], key: string) => opts.find((o) => o.key =
 export const fieldLabel = 'block text-sm font-semibold text-stone-700 mb-2'
 export const inputClass =
   'px-4 py-2.5 border border-warm-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-warm-500 focus:border-warm-500 bg-white'
+
+// ── Money helpers ──
+export const money = (n: number) => '$' + Math.round(n).toLocaleString('en-US')
+export const roundTo = (n: number, step: number) => Math.round(n / step) * step
+export const rangeText = (r: PriceRange) => money(r.low) + ' to ' + money(r.high)
 
 export function Chips({ name, options, value, onChange }: { name: string; options: Option[]; value: string; onChange: (v: string) => void }) {
   return (
@@ -36,6 +42,46 @@ export function Chips({ name, options, value, onChange }: { name: string; option
   )
 }
 
+/** Small static table of general numbers, shown before any input. */
+export function PriceTable({ title, rows, note }: { title: string; rows: [string, string][]; note?: ComponentChildren }) {
+  return (
+    <div class="bg-warm-50 border border-warm-100 rounded-xl p-4">
+      <div class="text-sm font-semibold text-stone-900 mb-2">{title}</div>
+      <table class="w-full text-sm text-stone-700">
+        <tbody>
+          {rows.map(([label, value]) => (
+            <tr class="border-b border-warm-100 last:border-0">
+              <td class="py-1 pr-3">{label}</td>
+              <td class="py-1 text-right whitespace-nowrap">{value}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {note && <p class="text-xs text-stone-500 mt-2">{note}</p>}
+    </div>
+  )
+}
+
+/** Ballpark block inside the summary: optional breakdown lines, the total, or a plain line. */
+export function BallparkBox({ lines = [], total, text }: { lines?: [string, string][]; total?: PriceRange; text?: string }) {
+  return (
+    <div class="mt-4 pt-4 border-t border-warm-200">
+      <div class="text-sm font-semibold text-stone-900 mb-1">Ballpark</div>
+      {lines.length > 0 && (
+        <ul class="text-sm text-stone-700 space-y-0.5">
+          {lines.map(([k, v]) => (
+            <li>
+              {k}: {v}
+            </li>
+          ))}
+        </ul>
+      )}
+      {total && <div class="font-heading text-xl font-bold text-warm-800 mt-1">About {rangeText(total)}</div>}
+      {text && <p class="text-sm text-stone-700">{text}</p>}
+    </div>
+  )
+}
+
 /** Build the plain-text message the /book form gets prefilled with. */
 export function summaryText(title: string, rows: [string, string][]): string {
   return [title, ...rows.filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`)].join('\n')
@@ -51,13 +97,14 @@ export function sendToBook(message: string) {
   }
 }
 
-/** Card shell: heading, the fields (children), summary list, extra block, send button. */
+/** Card shell: heading, fields (children), summary + ballpark (extra), one disclaimer, send button. */
 export function PlannerCard({
   eyebrow,
   headline,
   subheadline,
   rows,
   extra,
+  disclaimer,
   onSend,
   children,
 }: {
@@ -66,6 +113,7 @@ export function PlannerCard({
   subheadline: string
   rows: [string, string][]
   extra?: ComponentChildren
+  disclaimer?: string
   onSend: () => void
   children: ComponentChildren
 }) {
@@ -81,7 +129,7 @@ export function PlannerCard({
       <div class="space-y-6">{children}</div>
 
       <div class="mt-8 bg-warm-50 border border-warm-100 rounded-xl p-5" aria-live="polite">
-        <div class="font-semibold text-stone-900 mb-2">Your summary</div>
+        <div class="text-sm font-semibold text-stone-900 mb-2">Your summary</div>
         {filled.length === 0 ? (
           <p class="text-sm text-stone-500">Pick a few options above and your summary shows up here.</p>
         ) : (
@@ -96,6 +144,7 @@ export function PlannerCard({
         )}
         {extra}
       </div>
+      {disclaimer && <p class="text-xs text-stone-500 mt-2">{disclaimer}</p>}
 
       <button
         type="button"
@@ -105,7 +154,7 @@ export function PlannerCard({
       >
         Send this to {RON} and {JAYME} <span aria-hidden="true">→</span>
       </button>
-      <p class="text-xs text-stone-500 text-center mt-2">Opens the estimate form with your summary filled in. Nothing is sent until you hit send there.</p>
+      <p class="text-xs text-stone-500 text-center mt-2">Opens the estimate form with all of this filled in.</p>
     </div>
   )
 }

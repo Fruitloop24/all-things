@@ -3,6 +3,8 @@
 @theme {
   --font-heading: 'Playfair Display', Georgia, serif;
   --font-body: 'Inter', system-ui, sans-serif;
+  /* Tailwind's default (html, preflight) family = the body face, so nothing falls back to system sans. */
+  --font-sans: 'Inter', system-ui, sans-serif;
 
   --color-warm-50: #fdf8f0;
   --color-warm-100: #f5ebe0;

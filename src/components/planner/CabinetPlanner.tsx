@@ -1,14 +1,11 @@
 import { useState } from 'preact/hooks'
 import { CONFIG } from '../../config'
 import type { CabinetPricing, PriceRange } from '../../config'
-import { Chips, PlannerCard, fieldLabel, inputClass, labelOf, sendToBook, summaryText } from './kit'
+import { BallparkBox, Chips, PlannerCard, PriceTable, fieldLabel, inputClass, labelOf, rangeText, roundTo, sendToBook, summaryText } from './kit'
 
 const P = CONFIG.cabinets.planner
 const PRICING: CabinetPricing | null = CONFIG.cabinets.pricing
-
-const money = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`
-const round100 = (n: number) => Math.round(n / 100) * 100
-const rangeText = (r: PriceRange) => `${money(r.low)} to ${money(r.high)}`
+const round100 = (n: number) => roundTo(n, 100)
 
 /** Per-foot cabinet range for a grade; no grade or "not sure" = lowest low to highest high. */
 function gradeRange(pricing: CabinetPricing, grade: string): PriceRange {
@@ -63,56 +60,48 @@ export default function CabinetPlanner() {
   ]
 
   function send() {
-    const sendRows: [string, string][] = bp ? [...rows, ['Ballpark', `${rangeText(bp.total)} (ballpark only, not a quote)`]] : rows
+    const sendRows: [string, string][] = bp ? [...rows, ['Ballpark', `${rangeText(bp.total)} (ballpark only)`]] : rows
     sendToBook(summaryText('Cabinet Planner', sendRows))
   }
 
-  const disclaimer = PRICING && <p class="text-xs text-stone-500 mt-2">{PRICING.disclaimer}</p>
-
   const extra = bp && (
-    <div class="mt-4 pt-4 border-t border-warm-200">
-      <div class="text-sm font-semibold text-stone-900 mb-1">Ballpark</div>
-      <ul class="text-sm text-stone-700 space-y-0.5">
-        <li>Cabinets: {rangeText(bp.cabinets)}</li>
-        {bp.countertop && (
-          <li>
-            Countertop (about {bp.countertopSqFt} sq ft): {rangeText(bp.countertop)}
-          </li>
-        )}
-      </ul>
-      <div class="text-lg font-bold text-warm-800 mt-2">About {rangeText(bp.total)}</div>
-      {disclaimer}
-    </div>
+    <BallparkBox
+      lines={[
+        ['Cabinets', rangeText(bp.cabinets)],
+        ...(bp.countertop ? ([[`Countertop (about ${bp.countertopSqFt} sq ft)`, rangeText(bp.countertop)]] as [string, string][]) : []),
+      ]}
+      total={bp.total}
+    />
   )
 
+  const topNote = PRICING
+    ? 'Countertops add ' +
+      P.countertops
+        .map((c) => {
+          const r = (PRICING.countertopPerSqFt as Record<string, PriceRange | undefined>)[c.key]
+          return r ? `${c.label.toLowerCase()} ${rangeText(r)}` : ''
+        })
+        .filter(Boolean)
+        .join(', ') +
+      ' per sq ft.'
+    : undefined
+
   return (
-    <PlannerCard eyebrow={P.eyebrow} headline={P.headline} subheadline={P.subheadline} rows={rows} extra={extra} onSend={send}>
+    <PlannerCard
+      eyebrow={P.eyebrow}
+      headline={P.headline}
+      subheadline={P.subheadline}
+      rows={rows}
+      extra={extra}
+      disclaimer={PRICING?.disclaimer}
+      onSend={send}
+    >
       {PRICING && (
-        <div class="bg-warm-50 border border-warm-100 rounded-xl p-4">
-          <div class="text-sm font-semibold text-stone-900 mb-2">General numbers, installed, per foot of wall</div>
-          <table class="w-full text-sm text-stone-700">
-            <tbody>
-              {PRICING.grades.map((g) => (
-                <tr class="border-b border-warm-100 last:border-0">
-                  <td class="py-1 pr-3 whitespace-nowrap">{g.label}</td>
-                  <td class="py-1 text-right whitespace-nowrap">{rangeText(g.perLinearFoot)} per ft</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <p class="text-xs text-stone-500 mt-2">
-            Countertops add{' '}
-            {P.countertops
-              .map((c) => {
-                const r = (PRICING.countertopPerSqFt as Record<string, PriceRange | undefined>)[c.key]
-                return r ? `${c.label.toLowerCase()} ${rangeText(r)}` : ''
-              })
-              .filter(Boolean)
-              .join(', ')}{' '}
-            per sq ft.
-          </p>
-          {disclaimer}
-        </div>
+        <PriceTable
+          title="General numbers, installed, per foot of wall"
+          rows={PRICING.grades.map((g) => [g.label, `${rangeText(g.perLinearFoot)} per ft`] as [string, string])}
+          note={topNote}
+        />
       )}
 
       <div>

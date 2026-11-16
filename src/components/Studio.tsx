@@ -238,8 +238,8 @@ function VisualizerTab() {
         <div className="text-sm text-stone-600 leading-relaxed">
           <strong className="text-stone-800">Pro tip:</strong> Use a well-lit photo taken from about head height showing as much floor as possible. That gives the best results.
           <span className="text-stone-400 ml-1">
-            Upload your room, pick a floor, and hit Visualize. Not sure what type? See our{' '}
-            <a href="/resources" className="text-warm-600 hover:text-warm-700 underline">flooring guide</a>.
+            Upload your room, pick a floor, and hit Visualize. Not sure what type?{' '}
+            <a href={CONFIG.phone.href} className="text-warm-600 hover:text-warm-700 underline">Give us a call</a>.
           </span>
         </div>
       </div>
@@ -579,8 +579,8 @@ function CalculatorTab() {
         <div className="text-sm text-stone-600 leading-relaxed">
           <strong className="text-stone-800">Pick a floor, enter your room size, and add extras</strong> and you'll get an estimated range instantly.
           <span className="text-stone-400 ml-1">
-            Need help measuring? Try our{' '}
-            <a href="/resources" className="text-warm-600 hover:text-warm-700 underline">sq ft guide &amp; practice game</a>.
+            Need help measuring? Length times width for each room, then add 10% for cuts. Or{' '}
+            <a href="/book" className="text-warm-600 hover:text-warm-700 underline">set up an estimate</a> and we will measure.
           </span>
         </div>
       </div>

@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro'
 import PageBanner from '../components/PageBanner.astro'
 import PhotoGrid from '../components/PhotoGrid.astro'
 import EstimateCta from '../components/EstimateCta.astro'
+import FAQ from '../components/FAQ.astro'
 import CabinetPlanner from '../components/planner/CabinetPlanner'
 import { CONFIG } from '../config'
 
@@ -24,13 +25,15 @@ const c = CONFIG.cabinets
       {
         c.groups.map((g) => (
           <div>
-            <h3 class="font-heading text-2xl md:text-3xl font-bold text-stone-900 mb-5">{g.title}</h3>
+            <h3 class="font-heading text-xl md:text-2xl font-bold text-stone-900 mb-5">{g.title}</h3>
             <PhotoGrid photos={g.photos} cols={g.photos.length < 3 ? 'two' : 'three'} />
           </div>
         ))
       }
     </div>
   </section>
+
+  <FAQ faqs={CONFIG.cabinets.faqs} headline="Cabinet Questions" />
 
   <EstimateCta />
 </Base>
