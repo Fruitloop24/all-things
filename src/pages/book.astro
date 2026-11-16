@@ -1,23 +1,22 @@
 ---
 import Base from '../layouts/Base.astro'
 import BookingForm from '../components/BookingForm'
+import Suppliers from '../components/Suppliers.astro'
 import { CONFIG } from '../config'
 
 const ronFirst = CONFIG.team.management[0].name.split(' ')[0]
 const jamieFirst = CONFIG.team.management[1].name.split(' ')[0]
 ---
 
-<Base
-  title="Book a Free Estimate"
-  description="Schedule your free in-home flooring estimate in Eastman, GA and surrounding areas. Pick a time that works — we'll come measure and lock in your price.">
+<Base title={CONFIG.book.title} description={CONFIG.book.description}>
   <section class="bg-gradient-to-b from-warm-100 to-warm-50 border-b border-warm-200 py-12 md:py-16 text-center">
     <div class="max-w-3xl mx-auto px-4">
-      <p class="text-warm-700 text-xs font-semibold tracking-widest uppercase mb-2">Free &middot; No-Obligation</p>
+      <p class="text-warm-700 text-xs font-semibold tracking-widest uppercase mb-2">{CONFIG.book.eyebrow}</p>
       <h1 class="font-heading text-3xl md:text-5xl font-bold text-warm-900 mb-3">
-        Book a Free Estimate
+        {CONFIG.book.headline}
       </h1>
       <p class="text-stone-600 text-base md:text-lg leading-relaxed max-w-xl mx-auto">
-        Tell us about your project and your preferred time — we'll confirm within 24 hours. {ronFirst} or {jamieFirst} will come measure your space and lock in your price — no pressure, no hidden fees.
+        This is not a booked appointment. Tell us what you need and a day and time that would suit you, and {ronFirst} or {jamieFirst} will call or text to settle the time.
       </p>
     </div>
   </section>
@@ -28,10 +27,12 @@ const jamieFirst = CONFIG.team.management[1].name.split(' ')[0]
     </div>
   </section>
 
+  <Suppliers bg="bg-white" />
+
   <section class="py-12 bg-white border-t border-warm-100 text-center">
     <div class="max-w-xl mx-auto px-4">
       <h2 class="font-heading text-xl md:text-2xl font-bold text-stone-900 mb-2">Rather just talk?</h2>
-      <p class="text-stone-500 mb-6 text-sm md:text-base">We book estimates {CONFIG.bookingApi.hoursLabel}. Call or text {ronFirst} anytime.</p>
+      <p class="text-stone-500 mb-6 text-sm md:text-base">Call or text {ronFirst} anytime.</p>
       <a
         href={CONFIG.phone.href}
         class="inline-flex items-center gap-2 bg-warm-700 hover:bg-warm-800 text-white px-6 py-3 rounded-xl font-semibold no-underline shadow-md transition-colors"

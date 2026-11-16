@@ -1,4 +1,4 @@
-import { useState } from 'preact/hooks'
+import { useEffect, useState } from 'preact/hooks'
 import { CONFIG } from '../config'
 
 type Step = 'info' | 'slots' | 'confirmed' | 'handoff' | 'requested'
@@ -23,6 +23,31 @@ interface Slot {
 }
 
 const API = CONFIG.bookingApi
+const RON = CONFIG.team.management[0].name.split(' ')[0]
+const JAMIE = CONFIG.team.management[1].name.split(' ')[0]
+
+// The Cabinet Planner (/cabinets) hands its summary over via sessionStorage,
+// with a ?message= query param as the fallback. Read once on mount.
+export const PREFILL_KEY = 'atft:prefill-message'
+const MAX_PREFILL = 1500
+
+function readPrefill(): string {
+  let msg = ''
+  try {
+    msg = sessionStorage.getItem(PREFILL_KEY) || ''
+    if (msg) sessionStorage.removeItem(PREFILL_KEY)
+  } catch {
+    // storage blocked: fall back to the query param
+  }
+  if (!msg) {
+    try {
+      msg = new URLSearchParams(window.location.search).get('message') || ''
+    } catch {
+      msg = ''
+    }
+  }
+  return msg.slice(0, MAX_PREFILL)
+}
 const REQUEST_URL = `${API.base}${API.requestPath}`
 const CONFIRM_URL = `${API.base}${API.confirmPath}`
 
@@ -72,6 +97,18 @@ export default function BookingForm() {
   const [error, setError] = useState('')
   const [conflictNotice, setConflictNotice] = useState('')
 
+  useEffect(() => {
+    const msg = readPrefill()
+    if (msg) setInfo((prev) => (prev.message ? prev : { ...prev, message: msg }))
+    if (window.location.search.includes('message=')) {
+      try {
+        window.history.replaceState(null, '', window.location.pathname)
+      } catch {
+        // ignore
+      }
+    }
+  }, [])
+
   const update = (k: keyof CustomerInfo) => (e: Event) =>
     setInfo({ ...info, [k]: (e.target as HTMLInputElement).value })
 
@@ -79,7 +116,7 @@ export default function BookingForm() {
   // slots), it already created the 📞 CALL event + fired Web Push on the
   // contractor's dashboard. Frontend just renders the message.
   function handleHandoff(message: string | undefined) {
-    setHandoffMessage(message || "We've got your info — someone will reach out within 24 hours.")
+    setHandoffMessage(message || "We've got your info. Someone will reach out within 24 hours.")
     setStep('handoff')
   }
 
@@ -111,17 +148,17 @@ export default function BookingForm() {
     e.preventDefault()
     setError('')
     if (!info.name.trim()) return setError('Please enter your name.')
-    if (!info.phone.trim()) return setError('Please enter a phone number so we can confirm.')
-    if (!info.email.trim()) return setError('Please enter an email so we can send a confirmation.')
+    if (!info.phone.trim()) return setError('Please enter a phone number so we can call or text you.')
+    if (!info.email.trim()) return setError('Please enter an email.')
     if (!info.address.trim()) return setError('Please enter the address where the work will happen.')
-    if (!info.preferredDate) return setError('Please pick a preferred date.')
+    if (!info.preferredDate) return setError('Please pick a day that would suit you.')
 
     setLoading(true)
     setExcludeIds([])
     try {
       const data = await requestSlots([])
       if (data.request_received) {
-        setRequestedMessage(data.message || "Thanks! We got your request — we'll contact you within 24 hours to lock in a time.")
+        setRequestedMessage(data.message || `Thanks! We got your request. ${RON} or ${JAMIE} will call or text within 24 hours to settle a time.`)
         setStep('requested')
         return
       }
@@ -163,7 +200,7 @@ export default function BookingForm() {
         const data = await res.json().catch(() => ({}))
         const fresh: Slot[] = Array.isArray(data?.new_slots) ? data.new_slots : []
         setSlots(fresh)
-        setConflictNotice('Someone just grabbed that one — here are the closest open times.')
+        setConflictNotice('That time was just taken. Here are other times that could work.')
         return
       }
 
@@ -214,7 +251,7 @@ export default function BookingForm() {
           <ul class="space-y-1.5">
             <li>&middot; You'll get a confirmation email shortly.</li>
             <li>&middot; We'll come to {info.address} and measure.</li>
-            <li>&middot; You'll get a written, itemized estimate — no pressure to decide on the spot.</li>
+            <li>&middot; You'll get a written, itemized estimate. No pressure to decide on the spot.</li>
           </ul>
         </div>
         <a href="/" class="inline-block text-warm-700 hover:text-warm-800 font-semibold text-sm no-underline">← Back to home</a>
@@ -275,8 +312,8 @@ export default function BookingForm() {
       <div class="bg-white rounded-2xl border border-warm-100 p-6 md:p-8 shadow-sm">
         <div class="mb-5">
           <p class="text-warm-700 text-xs font-semibold tracking-widest uppercase mb-1">Step 2 of 2</p>
-          <h2 class="font-heading text-xl md:text-2xl font-bold text-stone-900">Pick a time, {info.name.split(' ')[0]}</h2>
-          <p class="text-stone-500 text-sm mt-1">Tap one to lock it in.</p>
+          <h2 class="font-heading text-xl md:text-2xl font-bold text-stone-900">Times that could work, {info.name.split(' ')[0]}</h2>
+          <p class="text-stone-500 text-sm mt-1">Tap the one that suits you best, or ask for other times.</p>
         </div>
 
         {conflictNotice && (
@@ -287,12 +324,12 @@ export default function BookingForm() {
 
         {slots.length === 0 ? (
           <div class="text-center py-8">
-            <p class="text-stone-600 mb-4">No openings came back for that window.</p>
+            <p class="text-stone-600 mb-4">No times came back for that day.</p>
             <button
               onClick={() => setStep('info')}
               class="text-warm-700 hover:text-warm-800 font-semibold text-sm bg-transparent border-0 cursor-pointer"
             >
-              ← Try a different date
+              ← Try a different day
             </button>
           </div>
         ) : (
@@ -322,7 +359,7 @@ export default function BookingForm() {
             disabled={loading}
             class="text-sm text-stone-500 hover:text-stone-700 font-medium bg-transparent border-0 cursor-pointer disabled:opacity-50 text-left"
           >
-            ← Change date or info
+            ← Change day or info
           </button>
           <button
             onClick={noneWork}
@@ -344,7 +381,8 @@ export default function BookingForm() {
     >
       <div class="mb-1">
         <p class="text-warm-700 text-xs font-semibold tracking-widest uppercase mb-1">Free estimate request</p>
-        <h2 class="font-heading text-xl md:text-2xl font-bold text-stone-900">Tell us about your project</h2>
+        <h2 class="font-heading text-xl md:text-2xl font-bold text-stone-900">Tell us what you need</h2>
+        <p class="text-sm text-stone-500 mt-1.5">Nothing is booked yet. {RON} or {JAMIE} will call or text you to settle the time.</p>
       </div>
 
       <div>
@@ -385,16 +423,16 @@ export default function BookingForm() {
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label for="date" class="block text-sm font-semibold text-stone-700 mb-1.5">Preferred date <span class="text-warm-700">*</span></label>
+          <label for="date" class="block text-sm font-semibold text-stone-700 mb-1.5">Day that would suit you <span class="text-warm-700">*</span></label>
           <input
             id="date" type="date" required value={info.preferredDate} onInput={update('preferredDate')}
             min={todayISO()}
             class="w-full px-4 py-2.5 border border-warm-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-warm-500 focus:border-warm-500 bg-white"
           />
-          <p class="text-xs text-stone-500 mt-1">We book {API.hoursLabel}</p>
+          <p class="text-xs text-stone-500 mt-1">Preferred, not a confirmed time. Estimate visits are {API.hoursLabel}.</p>
         </div>
         <div>
-          <label class="block text-sm font-semibold text-stone-700 mb-1.5">Time of day</label>
+          <label class="block text-sm font-semibold text-stone-700 mb-1.5">Preferred time of day</label>
           <div class="grid grid-cols-3 gap-1.5 p-1 bg-warm-50 border border-warm-200 rounded-lg">
             {WINDOWS.map((w) => (
               <button
@@ -411,11 +449,11 @@ export default function BookingForm() {
 
       <div>
         <label for="message" class="block text-sm font-semibold text-stone-700 mb-1.5">
-          Tell us about your project <span class="text-stone-400 font-normal">(optional)</span>
+          What do you need? <span class="text-stone-400 font-normal">(optional)</span>
         </label>
         <textarea
-          id="message" rows={3} value={info.message} onInput={update('message')}
-          placeholder="Living room hardwood, about 400 sq ft. Want to replace carpet."
+          id="message" rows={info.message.includes('\n') ? 7 : 3} value={info.message} onInput={update('message')}
+          placeholder="Kitchen cabinets, about 14 ft of wall. Or new floors in the living room, about 400 sq ft."
           class="w-full px-4 py-2.5 border border-warm-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-warm-500 focus:border-warm-500 bg-white resize-none"
         />
       </div>
@@ -437,17 +475,17 @@ export default function BookingForm() {
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" />
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
             </svg>
-            Finding open times…
+            Sending…
           </>
         ) : (
           <>
-            Request my estimate <span aria-hidden="true">→</span>
+            Send my request <span aria-hidden="true">→</span>
           </>
         )}
       </button>
 
       <p class="text-xs text-stone-500 text-center">
-        We never share your info. Used only to confirm your appointment.
+        We never share your info. We only use it to get in touch about your estimate.
       </p>
     </form>
   )
