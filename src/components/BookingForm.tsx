@@ -278,8 +278,6 @@ export default function BookingForm() {
         <p class="text-stone-500 text-sm mb-6">
           Need us sooner?{' '}
           <a href={CONFIG.phone.href} class="text-warm-700 hover:text-warm-800 font-semibold no-underline">Call</a>
-          {' '}or{' '}
-          <a href={`sms:${CONFIG.phone.raw}`} class="text-warm-700 hover:text-warm-800 font-semibold no-underline">text</a>
           {' '}{CONFIG.phone.display}.
         </p>
         <a href="/" class="inline-block text-warm-700 hover:text-warm-800 font-semibold text-sm no-underline">← Back to home</a>

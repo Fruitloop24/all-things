@@ -675,7 +675,7 @@ export const CONFIG = {
     },
     {
       q: 'What flooring brands do you carry?',
-      a: 'We carry Shaw Floors, Mohawk, Armstrong, Daltile, COREtec, and more top-tier brands. Call or text and we will help you narrow it down.',
+      a: 'We carry Shaw Floors, Mohawk, Armstrong, Daltile, COREtec, and more top-tier brands. Call and we will help you narrow it down.',
     },
   ],
 
