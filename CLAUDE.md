@@ -1,6 +1,6 @@
 # All Things Flooring & Tile
 
-Website for All Things Flooring & Tile in Eastman, GA: cabinets first, then floors, tile and remodels. Astro (static) + Preact islands + Tailwind CSS 4, deployed on Cloudflare Pages with a Cloudflare Worker backend for the room visualizer.
+Website for All Things Flooring & Tile in Eastman, GA: cabinets first, then builds and remodels, custom work, floors and tile. Astro (static) + Preact islands + Tailwind CSS 4, deployed on Cloudflare Pages with a Cloudflare Worker backend for the room visualizer.
 
 ## Tech Stack
 
@@ -16,7 +16,6 @@ Website for All Things Flooring & Tile in Eastman, GA: cabinets first, then floo
 ```
 src/
   config.ts                      # Single source of truth: content, photos (PHOTOS), CTAs, reviews, cabinets, pricing
-  prefill.ts                     # sessionStorage key: Cabinet Planner -> /book message
   layouts/Base.astro             # SEO, OG, geo meta, PWA manifest link, Header + slot + Footer + MobileNav
   components/
     Header.astro / Footer.astro / MobileNav.astro   # nav from CONFIG.nav / footer.links / mobileNav
@@ -25,14 +24,20 @@ src/
     Suppliers.astro              # Supplier logo bar (landing + /book)
     PhotoGrid.astro              # Masonry grid of real job photos
     EstimateCta.astro            # "Set up an estimate" closing block
+    PageBanner.astro             # Full-bleed photo banner + H1 + intro (/cabinets, /custom, /build)
+    planner/
+      kit.tsx                    # shared: Chips, PlannerCard, summaryText, sendToBook
+      prefill.ts                 # sessionStorage key: planner summary -> /book message
+      CabinetPlanner.tsx         # island: cabinets + ballpark (/cabinets)
+      SimplePlanner.tsx          # island: no-price planner, kind="custom" | "build"
     Studio.tsx                   # island: room visualizer + flooring cost calculator (/studio)
-    CabinetPlanner.tsx           # island: cabinet planner (/cabinets, client:visible)
     BookingForm.tsx              # island: /book quick-connect form (Cerul-backed)
     SqFtChallenge.tsx            # island: sq ft game (/resources)
   pages/
-    index.astro                  # Hero rotating gallery, what we do, halfway/finished, reviews, suppliers, app, FAQ, CTA
-    cabinets.astro               # Cabinet gallery by room + Cabinet Planner
-    custom.astro                 # Custom work (barrel table), stairs, built-ins
+    index.astro                  # Hero gallery (word synced to panel), pick-where-to-start cards, reviews, suppliers, app, FAQ, CTA
+    cabinets.astro               # Banner, Cabinet Planner (ballpark), gallery by room
+    build.astro                  # Banner, build planner, new builds, barndominium kits, remodels, porch review
+    custom.astro                 # Banner, custom planner, barrel table, other one-off work
     book.astro                   # Set up an estimate (BookingForm) + supplier bar
     studio.astro, about.astro, resources.astro
 public/_redirects                # /newsletter /community /partners -> / (301), pages removed 2026-11
@@ -43,12 +48,13 @@ worker/                          # Room visualizer worker. Do not touch from sit
 
 - **Config-driven:** Everything flows from `src/config.ts` — business info, CTAs, nav, pricing, testimonials, suppliers, team, studio worker URL. Edit config, not components.
 - **Static output, no CF adapter:** `astro build` emits a plain `dist/` of HTML + assets. No `@astrojs/cloudflare` adapter — adding it splits output and breaks CF Pages routing.
-- **Interactivity via islands only:** Four Preact islands: `Studio.tsx`, `CabinetPlanner.tsx`, `BookingForm.tsx`, `SqFtChallenge.tsx`. Landing hero gallery, review carousel and mobile menu are vanilla `<script>` blocks in Astro files.
-- **Photos:** real job photos only, on R2 at `https://social.cerul.org/all-thing/site-images/work/<name>.webp` (bucket `cerul-social-media`, prefix `all-thing/site-images/`). Listed once in `PHOTOS` in config with alt + pixel size. No stock, no generated images. Mid-job shots are labelled "Halfway" / "Finished", never "Before" / "After".
+- **Interactivity via islands only:** Preact islands: `Studio.tsx`, `planner/CabinetPlanner.tsx`, `planner/SimplePlanner.tsx`, `BookingForm.tsx`, `SqFtChallenge.tsx`. Landing hero gallery, review carousel and mobile menu are vanilla `<script>` blocks. The hero is one timeline: `show()` sets the panel and its `data-word` together.
+- **Photos:** real job photos only, on R2 at `https://social.cerul.org/all-thing/site-images/work/<name>.webp` (bucket `cerul-social-media`, prefix `all-thing/site-images/`). Listed once in `PHOTOS` in config with alt + pixel size. No stock, no generated images, with one exception: `PHOTOS.barndoExample` is an owner-approved example image, always captioned "Example barndominium interior", never shown as their job. No during/after pairs (owner found them confusing); the `before-*` photos are not used.
 - **Showroom is closed (since 2026-08-31).** No showroom, walk-in, "stop by" or store-hours copy anywhere (pages, FAQ, team bios, JSON-LD, manifest). Phone and the site are the only ways in. Street address stays in footer + JSON-LD only.
 - **Copy rules:** no em-dashes, never "AI" in customer-facing copy, reviews in `testimonials` are real Google reviews, verbatim. No invented prices, towns or counts.
-- **Cabinet prices:** `CONFIG.cabinets.pricing` is `null` until Ron sends numbers (typed `CabinetPricing`: per-linear-foot low/high by grade + countertop adders). While null the planner shows no dollar figures.
-- **/book is a quick-connect, not a booking.** CTAs say "Set up an estimate", never "Book". Visitor sends what they need + a preferred day/time; Ron or Jamie call or text to settle it. The server decides `request_received` vs live slots; slot step reads "Times that could work". Island talks to Cerul's 2-endpoint backend at `hetzner.cerul.org` (contract in `docs/adding-booking.md`, do not change it from the site). The planner prefills the message via sessionStorage (`src/prefill.ts`) or `?message=`.
+- **Cabinet prices:** `CONFIG.cabinets.pricing` holds GENERAL typical installed ranges (per linear foot by grade, countertops per sq ft, 2 sq ft of top per ft of wall), not Ron's price list. Replace with Ron's numbers when he sends them; `null` hides all dollar figures. Ballpark rounds to $100, shows only after a wall length, always with the disclaimer, and goes to /book marked "ballpark only". `/custom` and `/build` show no prices.
+- **/book is a quick-connect, not a booking.** CTAs say "Set up an estimate", never "Book". Visitor sends what they need + a preferred day/time; Ron or Jayme call or text to settle it. The server decides `request_received` vs live slots; slot step reads "Times that could work". Island talks to Cerul's 2-endpoint backend at `hetzner.cerul.org` (contract in `docs/adding-booking.md`, do not change it from the site). Planners prefill the message via sessionStorage (`planner/prefill.ts`) or `?message=`.
+- **Team name spelling:** it is Jayme (Fordham), not Jamie. Image file `jamie-hat.png` and key `photo: 'jamie'` keep the old spelling on purpose.
 - **Worker AI pipeline:** Upload room + flooring images → R2 storage → Gemini analyzes both → Gemini edits room with new floor → saves to R2 → returns base64. Falls back to OpenAI if Gemini fails.
 - **Worker security:** Origin allowlist (`allthingsflooringntile.com`, `www.` variant, `*.all-things.pages.dev` previews, localhost dev ports) enforced on `/generate`. `/health` is open. Rate limited to 10 req / 60s / IP via Cloudflare's native `[[unsafe.bindings]] type = "ratelimit"` binding.
 
@@ -79,6 +85,7 @@ The worker requires these secrets (set via `wrangler secret put`):
 
 ## Current TODO
 
-- [ ] `CONFIG.cabinets.pricing`: waiting on Ron's per-linear-foot numbers by grade + countertop adders.
+- [ ] `CONFIG.cabinets.pricing`: general ranges live; swap in Ron's own numbers when he sends them.
+- [ ] Real barndominium photo to replace `PHOTOS.barndoExample`.
 - [ ] Expand `areaServed` / per-town landing pages (config-driven). See `docs/TODO.md`.
 - [ ] GBP name collision (blocked): directory listings wait until the name is locked. See `docs/TODO.md`.
