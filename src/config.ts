@@ -227,7 +227,7 @@ export const CONFIG = {
     items: [
       { title: 'Cabinets', desc: 'Kitchens, baths, laundry rooms, pantries, closets and built-ins. Get a ballpark online.', photo: PHOTOS.whiteKitchen, position: 'center 50%', href: '/cabinets' },
       { title: 'Build & Remodel', desc: 'New houses and barndominium kits built start to finish, plus additions, porches and remodels.', photo: PHOTOS.farmhouse, position: 'center 60%', href: '/build' },
-      { title: 'Custom Work', desc: 'Tables, bars, built-ins and one-off pieces, priced after we talk.', photo: PHOTOS.barrelTableShop, position: 'center 62%', href: '/custom' },
+      { title: 'Custom Work', desc: 'Tables, bars, built-ins and one-off pieces. If you can picture it, we can build it.', photo: PHOTOS.barrelTableShop, position: 'center 62%', href: '/custom' },
       { title: 'Floors', desc: 'Hardwood, vinyl plank, tile and carpet. See a new floor in a photo of your room.', photo: PHOTOS.bonusRoom, position: 'center 70%', href: '/studio' },
     ],
   },
@@ -319,12 +319,12 @@ export const CONFIG = {
     description: 'One-off custom pieces, stairs and built-ins from All Things Flooring & Tile in Eastman, GA. Tell us what you have in mind.',
     eyebrow: 'Custom Work',
     headline: 'Custom Work',
-    intro: 'Some jobs are not on any list. If you have something in mind, tell us about it. Every custom piece is priced after a conversation, so there are no set prices here.',
+    intro: 'Some jobs are not on any list. If you can picture it, we can build it. Tell us what you have in mind.',
     banner: { photo: PHOTOS.epoxyTopAntlers, position: 'center 50%' },
     planner: {
       eyebrow: 'Custom Planner',
       headline: 'Tell us what you want built',
-      subheadline: 'A few quick picks so we know where to start. Every custom piece is priced after we talk it through.',
+      subheadline: 'A few quick picks so we know where to start.',
       summaryTitle: 'Custom piece',
       fields: [
         { key: 'what', label: 'What is it?', short: 'Piece', type: 'chips', options: [
@@ -371,7 +371,7 @@ export const CONFIG = {
     planner: {
       eyebrow: 'Build Planner',
       headline: 'Tell us what you are planning',
-      subheadline: 'A few quick picks so we know where to start. No prices here: every build is priced after we talk it through.',
+      subheadline: 'A few quick picks so we know where to start.',
       summaryTitle: 'Build or remodel',
       fields: [
         { key: 'project', label: 'What are you planning?', short: 'Project', type: 'chips', options: [
@@ -404,7 +404,6 @@ export const CONFIG = {
         title: 'Barndominium kits',
         desc: 'The kit comes in and our crew builds it start to finish, from the slab to the cabinets, floors and tile, so you have one crew and one phone number the whole way. Tell us about the kit you are looking at, or the land you have, and we will talk it through.',
         photo: PHOTOS.barndoExample,
-        caption: 'Example barndominium interior',
       },
       remodels: {
         title: 'Remodels and additions',
