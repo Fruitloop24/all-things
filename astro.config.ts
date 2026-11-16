@@ -26,12 +26,16 @@ export default defineConfig({
         name: 'All Things Flooring & Tile',
         short_name: 'All Things',
         description:
-          'Your local flooring experts in Eastman, GA. Visualize floors, get estimates, and more.',
+          'Cabinets, flooring, tile and remodels in Eastman, GA. See our work, plan your cabinets, see a floor in your room, and set up an estimate.',
         theme_color: '#1a2744',
         background_color: '#fdf8f0',
         display: 'standalone',
         start_url: '/',
         scope: '/',
+        shortcuts: [
+          { name: 'Cabinets', short_name: 'Cabinets', url: '/cabinets', icons: [{ src: '/pwa-192.png', sizes: '192x192' }] },
+          { name: 'Set up an estimate', short_name: 'Estimate', url: '/book', icons: [{ src: '/pwa-192.png', sizes: '192x192' }] },
+        ],
         icons: [
           { src: '/pwa-192.png', sizes: '192x192', type: 'image/png' },
           { src: '/pwa-512.png', sizes: '512x512', type: 'image/png' },

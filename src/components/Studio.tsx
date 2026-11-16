@@ -28,7 +28,7 @@ export default function Studio() {
                 tab === t ? 'bg-white text-warm-800 shadow-sm' : 'text-stone-500 hover:text-stone-700'
               }`}
             >
-              {t === 'visualizer' ? 'AI Visualizer' : 'Cost Calculator'}
+              {t === 'visualizer' ? 'Room Visualizer' : 'Cost Calculator'}
             </button>
           ))}
         </div>
@@ -112,8 +112,8 @@ function VisualizerTab() {
   const handleShare = async () => {
     if (!resultImage) return
     const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/studio` : '/studio'
-    const shareTitle = `My new floor — ${CONFIG.appName}`
-    const shareText = `Just visualized new floors in my room with the All Things Flooring AI tool. Try it free 👇`
+    const shareTitle = `My new floor | ${CONFIG.appName}`
+    const shareText = `Just visualized new floors in my room with the All Things Flooring room visualizer. Try it free 👇`
 
     try {
       const blob = await (await fetch(resultImage)).blob()
@@ -142,7 +142,7 @@ function VisualizerTab() {
       setTimeout(() => setShareLabel('Share'), 2000)
     } catch (_) {
       // clipboard blocked — surface as a soft error
-      setError("Couldn't share automatically — try Save Image and post it manually.")
+      setError("Couldn't share automatically. Try Save Image and post it manually.")
     }
   }
 
@@ -161,7 +161,7 @@ function VisualizerTab() {
               </svg>
               New Floor
             </div>
-            <img src={resultImage} alt="AI result" className="w-full h-[480px] object-cover" />
+            <img src={resultImage} alt="Your room with the new floor" className="w-full h-[480px] object-cover" />
           </div>
         </div>
         <div className="flex items-center justify-between px-5 py-3 border-t border-warm-100">
@@ -236,7 +236,7 @@ function VisualizerTab() {
       <div className="bg-warm-50 border border-warm-200 rounded-xl px-5 py-3.5 mb-4 flex items-start gap-3">
         <span className="text-lg mt-0.5">📸</span>
         <div className="text-sm text-stone-600 leading-relaxed">
-          <strong className="text-stone-800">Pro tip:</strong> Use a well-lit photo taken from about head height showing as much floor as possible — that gives the best results.
+          <strong className="text-stone-800">Pro tip:</strong> Use a well-lit photo taken from about head height showing as much floor as possible. That gives the best results.
           <span className="text-stone-400 ml-1">
             Upload your room, pick a floor, and hit Visualize. Not sure what type? See our{' '}
             <a href="/resources" className="text-warm-600 hover:text-warm-700 underline">flooring guide</a>.
@@ -362,8 +362,8 @@ function VisualizerTab() {
               }}
               placeholder={
                 sampleFile
-                  ? 'Using uploaded sample — or type here to describe instead'
-                  : 'Describe the flooring you want — e.g. "dark walnut hardwood planks"'
+                  ? 'Using uploaded sample, or type here to describe instead'
+                  : 'Describe the flooring you want, e.g. "dark walnut hardwood planks"'
               }
               className="w-full pl-4 pr-32 py-3 rounded-xl border border-warm-200 focus:border-warm-500 focus:ring-2 focus:ring-warm-200/50 outline-none text-sm text-stone-800 placeholder:text-stone-400"
               onKeyDown={(e) => {
@@ -577,7 +577,7 @@ function CalculatorTab() {
       <div className="bg-warm-50 border border-warm-200 rounded-xl px-5 py-3.5 mb-5 flex items-start gap-3">
         <span className="text-lg mt-0.5">🧮</span>
         <div className="text-sm text-stone-600 leading-relaxed">
-          <strong className="text-stone-800">Pick a floor, enter your room size, and add extras</strong> — you'll get an estimated range instantly.
+          <strong className="text-stone-800">Pick a floor, enter your room size, and add extras</strong> and you'll get an estimated range instantly.
           <span className="text-stone-400 ml-1">
             Need help measuring? Try our{' '}
             <a href="/resources" className="text-warm-600 hover:text-warm-700 underline">sq ft guide &amp; practice game</a>.
@@ -750,7 +750,7 @@ function CalculatorTab() {
                     </div>
                   </>
                 ) : (
-                  <div className="text-3xl font-bold tracking-tight mt-1 text-warm-500">$—</div>
+                  <div className="text-3xl font-bold tracking-tight mt-1 text-warm-500">$ –</div>
                 )}
               </div>
             </div>
@@ -805,7 +805,7 @@ function CalculatorTab() {
                 </div>
 
                 <div className="mt-4 bg-warm-50 rounded-xl px-3 py-2.5 text-[10px] text-warm-700 text-center leading-relaxed">
-                  This is an estimate — most projects come in at or below the low end. Call for an exact quote tailored to your space.
+                  This is an estimate. Most projects come in at or below the low end. Call for an exact quote tailored to your space.
                 </div>
 
                 <a

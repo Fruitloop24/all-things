@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'preact/hooks'
 import { CONFIG } from '../config'
+import { PREFILL_KEY } from '../prefill'
 
 type Step = 'info' | 'slots' | 'confirmed' | 'handoff' | 'requested'
 type PreferredWindow = 'morning' | 'afternoon' | 'anytime'
@@ -28,7 +29,6 @@ const JAMIE = CONFIG.team.management[1].name.split(' ')[0]
 
 // The Cabinet Planner (/cabinets) hands its summary over via sessionStorage,
 // with a ?message= query param as the fallback. Read once on mount.
-export const PREFILL_KEY = 'atft:prefill-message'
 const MAX_PREFILL = 1500
 
 function readPrefill(): string {

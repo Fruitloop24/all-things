@@ -1,0 +1,35 @@
+---
+// Closing "Set up an estimate" block used on /cabinets and /custom.
+import { CONFIG } from '../config'
+
+interface Props {
+  headline?: string
+  text?: string
+}
+const { headline = CONFIG.closing.headline, text = CONFIG.closing.text } = Astro.props
+---
+
+<section class="py-16 bg-warm-900 text-white text-center relative overflow-hidden">
+  <div
+    class="absolute inset-0 opacity-[0.04]"
+    style="background-image: repeating-linear-gradient(90deg, transparent, transparent 58px, rgba(255,255,255,0.2) 58px, rgba(255,255,255,0.2) 60px);"
+  ></div>
+  <div class="relative max-w-xl mx-auto px-4">
+    <h2 class="font-heading text-2xl md:text-3xl font-bold mb-4">{headline}</h2>
+    <p class="text-warm-200 mb-8">{text}</p>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <a
+        href={CONFIG.cta.primary.href}
+        class="inline-flex items-center justify-center gap-2 bg-white text-warm-800 hover:bg-warm-100 px-8 py-4 rounded-xl font-semibold transition-all no-underline shadow-md"
+      >
+        {CONFIG.cta.primary.text}
+      </a>
+      <a
+        href={CONFIG.cta.call.href}
+        class="inline-flex items-center justify-center gap-2 border-2 border-warm-400/60 text-white hover:bg-white/10 px-8 py-4 rounded-xl font-semibold transition-all no-underline"
+      >
+        {CONFIG.cta.call.text}
+      </a>
+    </div>
+  </div>
+</section>

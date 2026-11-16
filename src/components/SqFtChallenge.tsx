@@ -224,7 +224,7 @@ export default function SqFtChallenge() {
 
             {result !== null && (
               <div className={`text-center mt-4 p-3 rounded-xl text-sm font-semibold ${result ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-                {result ? 'Nailed it! You got it right.' : `Not quite — the answer is ${room.area} sq ft. ${room.hint}`}
+                {result ? 'Nailed it! You got it right.' : `Not quite. The answer is ${room.area} sq ft. ${room.hint}`}
               </div>
             )}
 
