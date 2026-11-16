@@ -46,6 +46,10 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,png,jpg,webp,woff2}'],
         // /book?message=... (Cabinet Planner fallback) must still match the precached /book page.
         ignoreURLParametersMatching: [/^utm_/, /^fbclid$/, /^message$/],
+        // Static multi-page site: no app-shell fallback. Without this, a URL the precache does not
+        // match (every trailing-slash URL, e.g. /book/ from the sitemap or Google) was answered with
+        // the cached home page for anyone with the service worker installed.
+        navigateFallback: null,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,
