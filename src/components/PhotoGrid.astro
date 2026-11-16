@@ -1,0 +1,20 @@
+---
+// Masonry-style grid of real job photos. width/height attrs keep layout stable while images load.
+import type { Photo } from '../config'
+
+interface Props {
+  photos: Photo[]
+  cols?: 'two' | 'three'
+}
+const { photos, cols = 'three' } = Astro.props
+---
+
+<div class:list={['columns-2 gap-3 md:gap-4', cols === 'three' && 'md:columns-3']}>
+  {
+    photos.map((p) => (
+      <figure class="mb-3 md:mb-4 break-inside-avoid rounded-xl overflow-hidden border border-warm-100 bg-warm-100 shadow-sm">
+        <img src={p.src} alt={p.alt} width={p.w} height={p.h} loading="lazy" decoding="async" class="w-full h-auto block" />
+      </figure>
+    ))
+  }
+</div>

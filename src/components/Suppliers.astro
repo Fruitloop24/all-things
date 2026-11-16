@@ -1,0 +1,26 @@
+---
+// Supplier / partner logo bar. Used on the landing page and under the form on /book.
+import { CONFIG } from '../config'
+
+interface Props {
+  bg?: string
+}
+const { bg = 'bg-warm-50' } = Astro.props
+---
+
+<section class:list={['py-14 border-y border-warm-100', bg]}>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <p class="text-center text-xs font-semibold tracking-widest uppercase text-stone-400 mb-8">
+      Proud to carry brands you trust
+    </p>
+    <div class="flex flex-wrap items-center justify-center gap-x-10 gap-y-6">
+      {
+        CONFIG.suppliers.map((s) => (
+          <div class="flex items-center justify-center px-5 py-3 rounded-lg bg-white border border-stone-100 hover:border-warm-300 hover:shadow-sm transition-all">
+            <img src={s.logo} alt={s.name} class="h-14 md:h-16 w-auto object-contain" loading="lazy" />
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>

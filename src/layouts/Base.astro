@@ -16,8 +16,8 @@ interface Props {
 }
 
 const { title, description, canonical, image } = Astro.props
-const pageTitle = title ? `${title} | ${CONFIG.appName}` : `${CONFIG.appName} — ${CONFIG.tagline}`
-const pageDesc = description ?? CONFIG.hero.subheadline
+const pageTitle = title ? `${title} | ${CONFIG.appName}` : `${CONFIG.appName} | ${CONFIG.tagline}`
+const pageDesc = description ?? CONFIG.seo.description
 const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site).toString()
 const ogImage = image ?? new URL('/pwa-512.png', Astro.site).toString()
 ---

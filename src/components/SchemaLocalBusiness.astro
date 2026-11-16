@@ -56,16 +56,17 @@ const schema = {
     ...cities.map((name) => ({ '@type': 'City', name })),
     ...counties.map((name) => ({ '@type': 'AdministrativeArea', name })),
   ],
-  openingHoursSpecification: [
-    {
-      '@type': 'OpeningHoursSpecification',
-      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-      opens: '08:00',
-      closes: '16:00',
-    },
-  ],
   priceRange: '$$',
-  description: CONFIG.hero.subheadline,
+  description: CONFIG.seo.description,
+  knowsAbout: CONFIG.seo.services,
+  hasOfferCatalog: {
+    '@type': 'OfferCatalog',
+    name: 'Services',
+    itemListElement: CONFIG.seo.services.map((name) => ({
+      '@type': 'Offer',
+      itemOffered: { '@type': 'Service', name },
+    })),
+  },
   foundingDate: String(CONFIG.yearStarted),
 }
 ---
