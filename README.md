@@ -6,13 +6,15 @@ Website and PWA for **All Things Flooring & Tile**: cabinets, flooring, tile and
 
 ## What This Is
 
-- **Cabinets first:** landing hero is a rotating gallery of real jobs; `/cabinets` with a **Cabinet Planner** that shows a ballpark from general installed ranges (`CONFIG.cabinets.pricing`, to be replaced by Ron's numbers) and hands the summary to `/book`
-- **Build and remodel** (`/build`): new houses and barndominium kits built start to finish, additions, porches, remodels; planner, no prices
-- **Custom work** (`/custom`): barrel table, one-off pieces; planner, no prices
+- **Cabinets first:** landing hero is a rotating gallery of real jobs
+- **Ballpark planners** on `/cabinets`, `/build` and `/custom`, from GENERAL typical ranges in config (to be replaced by Ron's numbers); each hands its summary and ballpark to `/book`
+- **Build and remodel** (`/build`): new houses and barndominium kits built start to finish, additions, porches, remodels
+- **Custom work** (`/custom`): barrel and epoxy tables, bars, built-ins, shelving, countertops
+- **Page FAQs** with FAQPage JSON-LD on `/`, `/cabinets`, `/build`, `/custom`, `/studio`
 - **Set up an estimate** (`/book`): quick-connect form, not a booked appointment. Ron or Jayme call or text to settle the time
-- **Design Studio** (`/studio`): room visualizer + flooring cost calculator
+- **Flooring & Design** (`/studio`): room visualizer + flooring cost calculator
 - **Real Google reviews** (verbatim) and real job photos only (R2: `all-thing/site-images/work/`)
-- **PWA** with QR install, **Sq Ft Challenge** game on Resources
+- **PWA** with QR install
 - **Config-driven:** all content lives in `src/config.ts`
 
 ## Tech Stack
@@ -32,15 +34,14 @@ Website and PWA for **All Things Flooring & Tile**: cabinets, flooring, tile and
 | Route | What It Does |
 |-------|-------------|
 | `/` | Rotating hero gallery, pick-where-to-start cards, reviews, suppliers, app install, FAQ, CTA |
-| `/cabinets` | Banner, Cabinet Planner with ballpark, cabinet photos by room |
-| `/build` | Banner, build planner, new builds, barndominium kits, remodels |
-| `/custom` | Banner, custom planner, custom work, stairs, built-ins |
+| `/cabinets` | Banner, Cabinet Planner, cabinet photos by room, FAQ |
+| `/build` | Banner, build planner, new builds, barndominium kits, remodels, FAQ |
+| `/custom` | Banner, custom planner, custom work, stairs, built-ins, FAQ |
 | `/book` | Set up an estimate (BookingForm island) + supplier bar |
-| `/studio` | Room visualizer + cost calculator (Preact island) |
+| `/studio` | Flooring & Design: room visualizer + cost calculator (Preact island) |
 | `/about` | Team bios: Ron, Jayme, Landin, Gavin |
-| `/resources` | Sq ft guide, Sq Ft Challenge game, YouTube videos, newsletter signup |
 
-Removed 2026-11: `/newsletter`, `/community`, `/partners` (301 to `/` via `public/_redirects`).
+Removed 2026-11: `/newsletter`, `/community`, `/partners`, `/resources` (301 to `/` via `public/_redirects`).
 
 File layout: see `CLAUDE.md`.
 
@@ -52,8 +53,8 @@ File layout: see `CLAUDE.md`.
 - CTAs ("Set up an estimate", never "Book"), navigation, footer links
 - Job photos (`PHOTOS`), hero panels (each with its headline word), section cards
 - Reviews (real, verbatim), FAQ, team bios
-- Cabinets / build / custom pages + planner options, `cabinets.pricing` (general ranges until Ron's numbers)
-- Flooring calculator pricing, YouTube IDs, supplier logos, studio worker URL
+- Cabinets / build / custom pages, planner options, general price ranges (until Ron's numbers), page FAQs
+- Flooring calculator pricing, supplier logos, studio worker URL
 
 ## Commands
 

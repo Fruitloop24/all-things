@@ -62,7 +62,7 @@ Last updated: 2026-05-16
 - Why: rich-result eligibility, SERP shows breadcrumb path instead of raw URL.
 
 ### 4. Internal linking
-- [ ] Add 3–5 contextual in-body links from `/` to Resources and About. (`/cabinets`, `/custom`, `/studio`, `/book` are linked from the body since 2026-11.)
+- [ ] Add 3–5 contextual in-body links from `/` to About. (`/cabinets`, `/build`, `/custom`, `/studio`, `/book` are linked from the body since 2026-11.)
 - Why: crawlers weight in-body anchor text more than nav repetition. Distributes page authority better.
 
 ### 5. Polish

@@ -26,21 +26,21 @@ src/
     EstimateCta.astro            # "Set up an estimate" closing block
     PageBanner.astro             # Full-bleed photo banner + H1 + intro (/cabinets, /custom, /build)
     planner/
-      kit.tsx                    # shared: Chips, PlannerCard, summaryText, sendToBook
+      kit.tsx                    # shared: Chips, PriceTable, BallparkBox, PlannerCard, money helpers, sendToBook
       prefill.ts                 # sessionStorage key: planner summary -> /book message
-      CabinetPlanner.tsx         # island: cabinets + ballpark (/cabinets)
-      SimplePlanner.tsx          # island: no-price planner, kind="custom" | "build"
+      CabinetPlanner.tsx         # island: cabinets ballpark (/cabinets)
+      SimplePlanner.tsx          # island: ballpark planner from RangePricing, kind="custom" | "build"
     Studio.tsx                   # island: room visualizer + flooring cost calculator (/studio)
     BookingForm.tsx              # island: /book quick-connect form (Cerul-backed)
-    SqFtChallenge.tsx            # island: sq ft game (/resources)
   pages/
     index.astro                  # Hero gallery (word synced to panel), pick-where-to-start cards, reviews, suppliers, app, FAQ, CTA
-    cabinets.astro               # Banner, Cabinet Planner (ballpark), gallery by room
-    build.astro                  # Banner, build planner, new builds, barndominium kits, remodels, porch review
-    custom.astro                 # Banner, custom planner, barrel table, other one-off work
+    cabinets.astro               # Banner, intro, Cabinet Planner, gallery by room, page FAQ
+    build.astro                  # Banner, intro, build planner, new builds, barndominium kits, remodels, porch review, page FAQ
+    custom.astro                 # Banner, intro, custom planner, barrel table, other one-off work, page FAQ
     book.astro                   # Set up an estimate (BookingForm) + supplier bar
-    studio.astro, about.astro, resources.astro
-public/_redirects                # /newsletter /community /partners -> / (301), pages removed 2026-11
+    studio.astro                 # "Flooring & Design" (URL stays /studio): visualizer + flooring calculator
+    about.astro
+public/_redirects                # /newsletter /community /partners /resources -> / (301), pages removed 2026-11
 worker/                          # Room visualizer worker. Do not touch from site work.
 ```
 
@@ -48,12 +48,14 @@ worker/                          # Room visualizer worker. Do not touch from sit
 
 - **Config-driven:** Everything flows from `src/config.ts` — business info, CTAs, nav, pricing, testimonials, suppliers, team, studio worker URL. Edit config, not components.
 - **Static output, no CF adapter:** `astro build` emits a plain `dist/` of HTML + assets. No `@astrojs/cloudflare` adapter — adding it splits output and breaks CF Pages routing.
-- **Interactivity via islands only:** Preact islands: `Studio.tsx`, `planner/CabinetPlanner.tsx`, `planner/SimplePlanner.tsx`, `BookingForm.tsx`, `SqFtChallenge.tsx`. Landing hero gallery, review carousel and mobile menu are vanilla `<script>` blocks. The hero is one timeline: `show()` sets the panel and its `data-word` together.
-- **Photos:** real job photos only, on R2 at `https://social.cerul.org/all-thing/site-images/work/<name>.webp` (bucket `cerul-social-media`, prefix `all-thing/site-images/`). Listed once in `PHOTOS` in config with alt + pixel size. No stock, no generated images, with one exception: `PHOTOS.barndoExample` is an owner-approved example image, always captioned "Example barndominium interior", never shown as their job. No during/after pairs (owner found them confusing); the `before-*` photos are not used.
+- **Interactivity via islands only:** Preact islands: `Studio.tsx`, `planner/CabinetPlanner.tsx`, `planner/SimplePlanner.tsx`, `BookingForm.tsx`. Landing hero gallery, review carousel and mobile menu are vanilla `<script>` blocks. The hero is one timeline: `show()` sets the panel and its `data-word` together.
+- **Photos:** real job photos only, on R2 at `https://social.cerul.org/all-thing/site-images/work/<name>.webp` (bucket `cerul-social-media`, prefix `all-thing/site-images/`). Listed once in `PHOTOS` in config with alt + pixel size. No stock, no generated images, with one exception: `PHOTOS.barndoExample` is an owner-approved example image (alt text says "Example"; owner chose no caption). Swap it when a real photo comes. No during/after pairs (owner found them confusing); the `before-*` photos are not used.
 - **Showroom is closed (since 2026-08-31).** No showroom, walk-in, "stop by" or store-hours copy anywhere (pages, FAQ, team bios, JSON-LD, manifest). Phone and the site are the only ways in. Street address stays in footer + JSON-LD only.
 - **Copy rules:** no em-dashes, never "AI" in customer-facing copy, reviews in `testimonials` are real Google reviews, verbatim. No invented prices, towns or counts.
-- **Cabinet prices:** `CONFIG.cabinets.pricing` holds GENERAL typical installed ranges (per linear foot by grade, countertops per sq ft, 2 sq ft of top per ft of wall), not Ron's price list. Replace with Ron's numbers when he sends them; `null` hides all dollar figures. Ballpark rounds to $100, shows only after a wall length, always with the disclaimer, and goes to /book marked "ballpark only". `/custom` and `/build` show no prices.
-- **/book is a quick-connect, not a booking.** CTAs say "Set up an estimate", never "Book". Visitor sends what they need + a preferred day/time; Ron or Jayme call or text to settle it. The server decides `request_received` vs live slots; slot step reads "Times that could work". Island talks to Cerul's 2-endpoint backend at `hetzner.cerul.org` (contract in `docs/adding-booking.md`, do not change it from the site). Planners prefill the message via sessionStorage (`planner/prefill.ts`) or `?message=`.
+- **Ballpark planners (funnel, not quotes):** all three section pages have one. Ranges are GENERAL typical prices, not Ron's list, marked so in config: `cabinets.pricing` (per ft of wall by grade + countertop per sq ft, 2 sq ft of top per ft, rounds to $100), `build.planner.pricing` (per sq ft or flat, rounds to $1,000), `custom.planner.pricing` (flat / per ft / per sq ft, rounds to $100). Each shows a static table up top, a ballpark once sized (flat items need no size), ONE short disclaimer, and sends the ballpark to /book marked "ballpark only". Replace with Ron's numbers when he sends them; `null` hides dollar figures. Copy is confident: no hedging beyond that one line.
+- **Page order on section pages:** banner, intro, planner, photo galleries, page FAQ (FAQPage JSON-LD via `FAQ.astro`), CTA. The FAQs carry the SEO now that /resources is gone.
+- **Type system:** headings `font-heading` (Playfair Display), everything else the body face (Inter; `--font-sans` is set to Inter so unstyled elements never fall back). Scale: page H1 `text-3xl md:text-5xl`, section H2 `text-3xl md:text-4xl`, card titles (planners, booking form) `text-2xl md:text-3xl`, sub-group H3 `text-xl md:text-2xl`.
+- **/book is a quick-connect, not a booking.** CTAs say "Set up an estimate", never "Book". Form fields: name required, phone OR email required, address / preferred day / time of day / message optional; no day = no `preferred_start_iso` in the request. Tap-to-call, text and email buttons sit at the top of /book. Ron or Jayme call or text to settle the time. The server decides `request_received` vs live slots; slot step reads "Times that could work". Island talks to Cerul's 2-endpoint backend at `hetzner.cerul.org` (contract in `docs/adding-booking.md`, do not change it from the site). Planners prefill the message via sessionStorage (`planner/prefill.ts`) or `?message=`.
 - **Team name spelling:** it is Jayme (Fordham), not Jamie. Image file `jamie-hat.png` and key `photo: 'jamie'` keep the old spelling on purpose.
 - **Worker AI pipeline:** Upload room + flooring images → R2 storage → Gemini analyzes both → Gemini edits room with new floor → saves to R2 → returns base64. Falls back to OpenAI if Gemini fails.
 - **Worker security:** Origin allowlist (`allthingsflooringntile.com`, `www.` variant, `*.all-things.pages.dev` previews, localhost dev ports) enforced on `/generate`. `/health` is open. Rate limited to 10 req / 60s / IP via Cloudflare's native `[[unsafe.bindings]] type = "ratelimit"` binding.
